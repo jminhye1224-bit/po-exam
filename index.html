@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>의지보조기기사 60분 모의시험</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600&family=Noto+Serif+KR:wght@500;700&display=swap" rel="stylesheet">
@@ -141,6 +141,21 @@ svg .b{fill:var(--line)} svg .blast{fill:var(--accent)} svg .b100{fill:var(--goo
 .verse{margin:22px auto 14px;padding:18px 20px;max-width:52ch;background:var(--tint);border-radius:10px;border-left:4px solid var(--accent);text-align:left}
 .verse p{margin:0;font-family:var(--display);font-size:18px;line-height:1.8}
 .verse cite{display:block;margin-top:10px;font-style:normal;font-size:13.5px;color:var(--accent);font-weight:600}
+.chip.good{background:var(--goodtint);color:var(--good)}
+.wrap{padding-bottom:110px}
+.nav{position:fixed;left:0;right:0;bottom:0;z-index:6;display:grid;grid-template-columns:repeat(6,1fr);background:var(--surface);border-top:1px solid var(--line);padding:6px max(6px,calc(50% - 380px)) calc(6px + env(safe-area-inset-bottom,0px))}
+.nav[hidden]{display:none}
+.nav button{font:inherit;font-size:13px;font-weight:500;line-height:1.25;padding:10px 2px;border:0;border-radius:8px;background:transparent;color:var(--muted);cursor:pointer;word-break:keep-all}
+.nav button.on{background:var(--tint);color:var(--accent);font-weight:600}
+.nav button:nth-child(2){color:var(--accent);font-weight:600}
+.mm{border-bottom:1px solid var(--line);padding:10px 0}
+.mm:last-child{border-bottom:0}
+.mm summary{cursor:pointer;font-size:15px;line-height:1.55}
+.mm .ma{margin:8px 0 4px 18px;font-weight:600;color:var(--accent)}
+.mm .mexp,.mm .mnote,.mm .mp{margin:4px 0 0 18px;font-size:14px}
+.mm .mexp{color:var(--muted)} .mm .mp{color:var(--accent);font-size:13px}
+.link.del{color:var(--bad);margin-left:10px}
+h2 small{font-family:var(--body);font-weight:400;font-size:13px}
 @media (max-width:420px){h1{font-size:25px}.card{padding:16px}.score{font-size:52px}.stem{font-size:17.5px}.barcell{display:none}}
 @media (prefers-reduced-motion:no-preference){.opt,.btn,.g{transition:border-color .12s,background-color .12s}}
 </style>
@@ -150,6 +165,7 @@ svg .b{fill:var(--line)} svg .blast{fill:var(--accent)} svg .b100{fill:var(--goo
 <header class="top"><button class="brand" data-act="home">의지·보조기기사 모의시험</button><span class="sync wait" id="sync">저장소 연결 중</span></header>
 <main id="main"></main>
 </div>
+<nav class="nav" id="nav" aria-label="바로가기"></nav>
 <script>
 /* 문제은행 1 — 절단·절단 후 관리·팔 의지 (한글파일 1~8쪽). 보기의 첫 번째가 정답, 화면에서는 섞어서 냄 */
 const BANK=[];
@@ -495,22 +511,9 @@ Q('H',22,'L','KAFO잠금','KAFO 1) (2) ④ offset knee jt','offset knee jt의 �
 Q('H',22,'L','KAFO조절','KAFO 1) (3) ① fan lock knee jt','부채 모양의 조절판 각도에 따라 축의 가동범위를 변경하며 일반적으로 drop ring lock과 함께 적용하는 것은?',['fan lock knee jt','dial lock knee jt','bail lock knee jt','offset knee jt','stance control 무릎관절장치'],'fan lock: 부채 모양 조절판, 일반적으로 drop ring lock과 함께 적용.');
 Q('H',22,'L','KAFO조절','KAFO 1) (3) ② dial lock knee jt','굽힘과 폄 중 어느 한쪽의 움직임을 허용하고 반대쪽은 제한하거나 모두 제한하는 등 원하는 각도로 조절이 가능한 것은?',['dial lock knee jt','fan lock knee jt','drop ring lock knee jt','bail lock knee jt','offset knee jt'],'dial lock: 굽힘·폄 중 한쪽 허용/반대쪽 제한 또는 모두 제한 등 원하는 각도로 조절.');
 
-/* ===== T. 구용어 ↔ 신용어 (한글파일에 나란히 적힌 것만) ===== */
-const TERMS=[
-['전완','아래팔',1,'L'],['상완','위팔',1,'R'],['수부','손',3,'R'],['족부','발',1,'R'],['종골','발꿈치뼈',1,'R'],['경골','정강뼈',1,'R'],['비골','종아리뼈',1,'R'],['첨족','꿈치들린휜발',1,'R'],['상완골경','위팔뼈목',1,'R'],['견인','당김',1,'L'],
-['하퇴','종아리',2,'L'],['대퇴','넓적다리',2,'L'],['대전자','큰돌기',2,'L'],['장골','엉덩뼈',2,'L'],['대내전근','큰모음근',2,'R'],['장내전근','긴모음근',2,'R'],['종창','부기',2,'R'],
-['수지','손가락',3,'R'],['액와','겨드랑',5,'R'],['견갑골 극','어깨뼈 가시',6,'L'],['하각','아래구석',6,'L'],['거상','올림',8,'R'],['전반슬','젖힌무릎',9,'R'],['좌골지','궁둥뼈가지',10,'R'],
-['건고정','힘줄고정',14,'R'],['척골','자뼈',14,'R'],['회내','엎침',14,'R'],['익상견갑골','날개어깨뼈',15,'R'],['전거근','앞톱니근',15,'R'],['종골보행','발꿈치뼈보행',19,'R']
-];
-(function(){
-  function others(i,k){const o=[];let j=i;while(o.length<4){j=(j*7+3)%TERMS.length;if(j!==i&&!o.includes(TERMS[j][k]))o.push(TERMS[j][k]);else j++;}return o;}
-  TERMS.forEach((t,i)=>{
-    Q('T',t[2],t[3],'용어-'+t[0],'본문 괄호 표기 「'+t[0]+'('+t[1]+')」','구용어 「'+t[0]+'」에 해당하는 새 용어는?',[t[1]].concat(others(i,1)),'「'+t[0]+'」 = 「'+t[1]+'」. 한글파일에 두 용어가 나란히 적혀 있음.');
-    Q('T',t[2],t[3],'용어-'+t[0],'본문 괄호 표기 「'+t[0]+'('+t[1]+')」','새 용어 「'+t[1]+'」에 해당하는 구용어는?',[t[0]].concat(others(i,0)),'「'+t[1]+'」 = 「'+t[0]+'」. 한글파일에 두 용어가 나란히 적혀 있음.');
-  });
-})();
 /* ===== 앱 ===== */
-const SEC={A:'절단 총론',B:'절단 후 관리·처방',C:'팔 의지',D:'다리 의지',E:'보조기의 원리',F:'팔 보조기',G:'발 보조기·구두',H:'발목·AFO·KAFO',T:'구용어 ↔ 새 용어'};
+const SEC={A:'절단 총론',B:'절단 후 관리·처방',C:'팔 의지',D:'다리 의지',E:'보조기의 원리',F:'팔 보조기',G:'발 보조기·구두',H:'발목·AFO·KAFO'};
+const HOOK='';
 const NUM=['①','②','③','④','⑤'];
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return 'k'+h.toString(36)}
 const QMAP={};BANK.forEach(q=>{q.id=hash(q.sec+q.stem);QMAP[q.id]=q});
@@ -524,7 +527,7 @@ const pct=(a,b)=>b?Math.round(a/b*100):0;
 const clone=o=>JSON.parse(JSON.stringify(o));
 
 /* ----- 시험 전 응원과 말씀 ----- */
-const CHEER=['예담아~ 하나님이 가장 선한 길로 인도하실 거야!','예담아, 오늘도 한 걸음이면 충분해. 지금까지 한 만큼 분명히 쌓였어!','예담아, 떨릴 땐 숨 한 번 크게 쉬고. 아는 만큼만 차분하게 풀면 돼!','예담아, 틀려도 괜찮아. 오늘 틀린 건 시험 날 맞히라고 미리 나온 거야!','예담아, 네가 애쓴 시간을 하나님이 다 아셔. 끝까지 같이 가자!','예담아, 오늘의 60문제도 합격으로 가는 길 위에 있어. 힘내!','예담아, 결과는 맡기고 오늘은 눈앞의 한 문제에만 집중하자!'];
+const CHEER=['예담아~ 하나님이 가장 선한 길로 인도하실 거야!','예담아, 오늘도 한 걸음이면 충분해. 지금까지 한 만큼 분명히 쌓였어!','예담아, 떨릴 땐 숨 한 번 크게 쉬고. 아는 만큼만 차분하게 풀면 돼!','예담아, 틀려도 괜찮아. 오늘 틀린 건 시험 날 맞히라고 미리 나온 거야!','예담아, 네가 애쓴 시간을 하나님이 다 아셔. 끝까지 같이 가자!','예담아, 오늘의 50문제도 합격으로 가는 길 위에 있어. 힘내!','예담아, 결과는 맡기고 오늘은 눈앞의 한 문제에만 집중하자!'];
 const VERSES=[['잠언 3:5-6','너는 마음을 다하여 여호와를 의뢰하고 네 명철을 의지하지 말라 너는 범사에 그를 인정하라 그리하면 네 길을 지도하시리라'],['야고보서 1:5','너희 중에 누구든지 지혜가 부족하거든 모든 사람에게 후히 주시고 꾸짖지 아니하시는 하나님께 구하라 그리하면 주시리라'],['빌립보서 4:13','내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라'],['잠언 16:3','너의 행사를 여호와께 맡기라 그리하면 너의 경영하는 것이 이루리라'],['이사야 41:10','두려워 말라 내가 너와 함께 함이니라 놀라지 말라 나는 네 하나님이 됨이니라 내가 너를 굳세게 하리라 참으로 너를 도와 주리라 참으로 나의 의로운 오른손으로 너를 붙들리라'],['히브리서 11:1','믿음은 바라는 것들의 실상이요 보지 못하는 것들의 증거니'],['잠언 2:6','대저 여호와는 지혜를 주시며 지식과 명철을 그 입에서 내심이며'],['여호수아 1:9','내가 네게 명한 것이 아니냐 마음을 강하게 하고 담대히 하라 두려워 말며 놀라지 말라 네가 어디로 가든지 네 하나님 여호와가 너와 함께 하느니라'],['시편 37:5','너의 길을 여호와께 맡기라 저를 의지하면 저가 이루시고'],['로마서 8:28','우리가 알거니와 하나님을 사랑하는 자 곧 그 뜻대로 부르심을 입은 자들에게는 모든 것이 합력하여 선을 이루느니라'],['잠언 9:10','여호와를 경외하는 것이 지혜의 근본이요 거룩하신 자를 아는 것이 명철이니라'],['예레미야 29:11','나 여호와가 말하노라 너희를 향한 나의 생각은 내가 아나니 재앙이 아니라 곧 평안이요 너희 장래에 소망을 주려 하는 생각이라'],['디모데후서 1:7','하나님이 우리에게 주신 것은 두려워하는 마음이 아니요 오직 능력과 사랑과 근신하는 마음이니'],['시편 46:1','하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라']];
 
 /* ----- 저장 ----- */
@@ -550,7 +553,7 @@ async function initDb(){
     else if(S.updated)dbWrite('study/core',S);
     {const n0=EX.length;EX=EX.filter(e=>(e.ts||0)>(S.resetAt||0));if(EX.length!==n0)changed=true}
     const ids=new Set(EX.map(e=>e.id)),rids=new Set();
-    ex.docs.forEach(dc=>{const e=clone(dc.data());if(!e||!e.id)return;rids.add(e.id);if(!ids.has(e.id)&&(e.ts||0)>(S.resetAt||0)){EX.push(e);changed=true}});
+    ex.docs.forEach(dc=>{const e=clone(dc.data());if(!e||!e.id)return;rids.add(e.id);if(!ids.has(e.id)&&(e.ts||0)>(S.resetAt||0)&&!(S.del||[]).includes(e.id)){EX.push(e);changed=true}});
     EX.forEach(e=>{if(!rids.has(e.id))dbWrite('exams/'+e.id,e)});
     EX.sort((a,b)=>a.ts-b.ts);LS.set('exams',EX);EX.forEach(e=>reg(e.syn));
     if(!P&&pr.exists){const r=clone(pr.data());if(r&&r.qids&&!EX.some(e=>e.id===r.id)){P=r;reg(P.syn);LS.set('prog',P);changed=true}}
@@ -562,38 +565,40 @@ async function initDb(){
 const stat=id=>S.qs[id]||(S.qs[id]={s:0,w:0,st:0,d:0});
 const seen=q=>(S.qs[q.id]||{}).s||0;
 function buildExam(){
-  const N=60,picked=[],has=new Set(),lv=level();
+  const N=50,picked=[],has=new Set(),lv=level();
   const add=q=>{if(!q||has.has(q.id)||picked.length>=N)return false;if(q.sec==='T'&&picked.some(x=>x.topic===q.topic))return false;has.add(q.id);picked.push(q);return true};
   const least=list=>shuffle(list).sort((a,b)=>(seen(a)-seen(b))||(lv>1?hard(b)-hard(a):0));
   /* 1) 틀렸던 문제: 두 번 연속 맞힐 때까지 다시 */
-  const due=shuffle(BANK.filter(q=>(S.qs[q.id]||{}).d)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w).slice(0,26);
+  const due=shuffle(BANK.filter(q=>(S.qs[q.id]||{}).d)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w).slice(0,22);
   due.forEach(add);
   /* 2) 틀린 문제와 같은 주제의 비슷한 문제 */
-  let sib=0;due.forEach(q=>{if(sib>=12)return;if(add(least(BANK.filter(x=>x.topic===q.topic&&!has.has(x.id)))[0]))sib++});
+  let sib=0;due.forEach(q=>{if(sib>=10)return;if(add(least(BANK.filter(x=>x.topic===q.topic&&!has.has(x.id)))[0]))sib++});
   /* 3) 영역별 비율대로, 덜 본 문제부터 */
   const secs=Object.keys(SEC),cnt={};secs.forEach(s=>cnt[s]=BANK.filter(q=>q.sec===s).length);
-  const nonT=BANK.length-cnt.T;
-  secs.forEach(s=>{const target=s==='T'?6:Math.round(54*cnt[s]/nonT);let have=picked.filter(q=>q.sec===s).length;for(const q of least(BANK.filter(q=>q.sec===s&&!has.has(q.id)))){if(have>=target)break;if(add(q))have++}});
+  const nonT=BANK.length;
+  secs.forEach(s=>{const target=Math.round(N*cnt[s]/nonT);let have=picked.filter(q=>q.sec===s).length;for(const q of least(BANK.filter(q=>q.sec===s&&!has.has(q.id)))){if(have>=target)break;if(add(q))have++}});
   for(const q of least(BANK.filter(q=>!has.has(q.id)&&q.sec!=='T'))){if(picked.length>=N)break;add(q)}
   /* 4) 점수가 높으면 연결형 문제로 바꿔 더 헷갈리게 */
-  const syn={},dueIds=new Set(due.map(q=>q.id));let need=lv===3?12:lv===2?6:0;
+  const syn={},dueIds=new Set(due.map(q=>q.id));let need=0;
   const qs=shuffle(picked).map(q=>{if(need>0&&!dueIds.has(q.id)&&shortQ(q)){const y=mkSyn(q);if(y){need--;syn[y.id]=y;return y}}return q});
   reg(syn);const order={};qs.forEach(q=>order[q.id]=shuffle([0,1,2,3,4]));
   const now=Date.now();
   return {id:'e'+now.toString(36),start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn,lv};
 }
+function applyItem(i){const q=QMAP[i.q];if(!q)return;const s=stat(q.base||i.q);s.s++;if(i.ok&&i.f){s.st=0;s.d=1}else if(i.ok){s.st++;if(s.d&&s.st>=2)s.d=0}else{s.w++;s.st=0;s.d=1}}
+function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach(e=>e.items.forEach(applyItem))}
 function grade(){
   if(!P)return;clearInterval(tick);
   const items=P.qids.filter(id=>QMAP[id]).map(id=>{const ch=(id in P.ans)?P.ans[id]:-1;return {q:id,ch,ok:ch===0?1:0,f:P.flag[id]?1:0}});
-  items.forEach(i=>{const s=stat(QMAP[i.q].base||i.q);s.s++;if(i.ok&&i.f){s.st=0;s.d=1}else if(i.ok){s.st++;if(s.d&&s.st>=2)s.d=0}else{s.w++;s.st=0;s.d=1}});
+  items.forEach(applyItem);
   const e={id:P.id,ts:Date.now(),date:today(),dur:Math.min(3600,Math.round((Date.now()-P.start)/1000)),score:items.filter(i=>i.ok).length,n:items.length,items,order:P.order,syn:P.syn||{},lv:P.lv||1};
-  EX.push(e);P=null;saveProg();saveCore();saveExam(e);cur=e;go('result');
+  EX.push(e);if(HOOK){try{fetch(HOOK,{method:'POST',mode:'no-cors',body:JSON.stringify({pct:pct(e.score,e.n),score:e.score,n:e.n,wrong:e.n-e.score,flag:items.filter(i=>i.f).length,lv:LVN[e.lv],min:Math.round(e.dur/60)})}).catch(()=>{})}catch(x){}}P=null;saveProg();saveCore();saveExam(e);cur=e;go('result');
 }
 const wrongOf=e=>e?e.items.filter(i=>(!i.ok||i.f)&&QMAP[i.q]):[];
 const lastExam=()=>EX[EX.length-1]||null;
 /* ----- 난이도 ----- */
 const reg=o=>{if(o)Object.keys(o).forEach(k=>{QMAP[k]=o[k]})};
-function level(){const r=EX.slice(-2);if(!r.length)return 1;const a=r.reduce((t,e)=>t+pct(e.score,e.n),0)/r.length;return a>=90?3:a>=75?2:1}
+function level(){return 2}
 const LVN=['','기본','어려움','가장 어려움'];
 const hard=q=>(/않은|아닌|연결|순서/.test(q.stem)||/\d/.test(q.opts[0]))?1:0;
 const shortQ=q=>q.sec!=='T'&&!/않은|아닌|연결|순서/.test(q.stem)&&q.stem.length<=50&&q.opts.every(o=>o.length<=28);
@@ -602,7 +607,7 @@ function mkSyn(b){const pool=shuffle(BANK.filter(x=>x.sec===b.sec&&x.id!==b.id&&
   return {id:'s'+hash(b.id+pool.map(x=>x.id).join('')),base:b.id,sec:b.sec,p:b.p,col:b.col,topic:b.topic,head:b.head,stem:'다음 중 질문과 답이 옳게 연결된 것은?',opts:[lab(b)+' → '+b.opts[0]].concat(pool.map(x=>lab(x)+' → '+x.opts[1+Math.floor(Math.random()*4)])),exp:'옳은 연결은 다음과 같습니다. '+[b].concat(pool).map(x=>lab(x)+' → '+x.opts[0]+' ('+x.p+'쪽)').join(' / '),locText:'해설에 적힌 쪽을 각각 확인 · 기준 문제는 '+loc(b)};}
 
 /* ----- 화면 ----- */
-function go(v){view=v;clearInterval(tick);const m=$('#main');m.innerHTML=VIEWS[v]();window.scrollTo(0,0);if(v==='exam')startTick();setSync(sync);}
+function go(v){view=v;clearInterval(tick);const m=$('#main');m.innerHTML=VIEWS[v]();window.scrollTo(0,0);if(v==='exam')startTick();setSync(sync);drawNav();}
 function steps(n){const L=['결과','오답노트','다시 풀기','오늘 정리'];return '<ol class="steps">'+L.map((t,i)=>'<li class="'+(i+1===n?'on':i+1<n?'done':'')+'"><span>'+(i+1)+'</span>'+t+'</li>').join('')+'</ol>'}
 function bar(p,cls){return '<div class="bar"><i class="'+(cls||'')+'" style="width:'+p+'%"></i></div>'}
 function secTable(items){
@@ -611,18 +616,46 @@ function secTable(items){
 }
 function dday(){if(!S.examDate)return '';const d=Math.round((new Date(S.examDate+'T00:00:00')-new Date(today()+'T00:00:00'))/864e5);return d>0?'D-'+d:d===0?'D-DAY':'시험일 지남'}
 
+function qcard(e,i,note){const q=QMAP[i.q],no=e.items.indexOf(i)+1,ord=(e.order&&e.order[q.id])||[0,1,2,3,4],s=S.qs[q.base||q.id]||{w:0};
+  return '<article class="card q"><div class="chips"><span class="chip">'+(EX.indexOf(e)+1)+'회 '+no+'번</span><span class="chip">'+SEC[q.sec]+'</span>'+(i.ok?(i.f?'<span class="chip mid">맞았지만 헷갈림</span>':'<span class="chip good">정답</span>'):'<span class="chip bad">오답</span>')+(s.w>1?'<span class="chip bad">누적 '+s.w+'번 틀림</span>':'')+'</div><p class="stem">'+esc(q.stem)+'</p><ul class="opts static">'+ord.map((oi,k)=>'<li class="'+(oi===0?'right':oi===i.ch?'wrong':'')+'"><span class="n">'+NUM[k]+'</span>'+esc(q.opts[oi])+(oi===0?'<em>정답</em>':oi===i.ch?'<em>내가 고른 답</em>':'')+'</li>').join('')+'</ul>'+(i.ch<0?'<p class="muted">답을 고르지 않았습니다.</p>':'')+
+  '<div class="exp"><b>해설</b> '+esc(q.exp)+'</div><div class="loc"><b>확인할 곳</b> '+esc(loc(q))+'</div>'+
+  (note?'<label class="notelabel" for="n-'+q.id+'">내 말로 다시 정리</label><textarea class="note" id="n-'+q.id+'" data-note="'+q.id+'" rows="3" placeholder="예: 굴곡형 손목장치는 30·50, 굽힘/돌림형은 25·50">'+esc(S.notes[q.id]||'')+'</textarea>':'')+'</article>'}
+/* 지금까지 틀리거나 헷갈린 문제 모음(문제마다 가장 최근 기록) */
+function allNotes(){const m={};EX.forEach(e=>e.items.forEach(i=>{if((!i.ok||i.f)&&QMAP[i.q])m[i.q]={e,i}}));const due=x=>(S.qs[QMAP[x.i.q].base||x.i.q]||{}).d?1:0,wc=x=>(S.qs[QMAP[x.i.q].base||x.i.q]||{}).w||0;return Object.keys(m).map(k=>m[k]).sort((a,b)=>due(b)-due(a)||wc(b)-wc(a))}
+const NAV=[['home','홈'],['start','시험 풀기'],['papers','시험지'],['notebook','오답노트'],['memo','암기노트'],['stats','통계']];
+const NAVON={home:'home',ready:'start',exam:'start',papers:'papers',paper:'papers',result:'papers',review:'notebook',notebook:'notebook',drill:'notebook',memo:'memo',final:'memo',stats:'stats'};
+function drawNav(){const n=$('#nav');if(!n)return;n.hidden=(view==='exam');n.innerHTML=NAV.map(x=>'<button data-act="'+(x[0]==='start'&&P?'resume':x[0])+'" class="'+(NAVON[view]===x[0]?'on':'')+'">'+(x[0]==='start'&&P?'이어서 풀기':x[1])+'</button>').join('')}
 const VIEWS={
+papers(){
+  if(!EX.length)return '<section class="card center"><h2>아직 푼 시험이 없습니다</h2><p class="lead">시험을 풀면 시험지가 회차별로 여기에 쌓입니다.</p><div class="row cjust"><button class="btn pri" data-act="start">시험 풀기</button></div></section>';
+  return '<section class="card"><h2>지금까지 푼 시험지</h2><p class="muted">회차를 누르면 점수와 시험지 전체를 볼 수 있습니다.</p><table class="tbl"><thead><tr><th>회차</th><th>날짜</th><th class="num">점수</th><th class="num">정답</th><th class="num">시간</th><th></th></tr></thead><tbody>'+EX.slice().reverse().map(e=>'<tr><td>'+(EX.indexOf(e)+1)+'회</td><td>'+e.date+'</td><td class="num"><b>'+pct(e.score,e.n)+'점</b></td><td class="num">'+e.score+' / '+e.n+'</td><td class="num">'+Math.floor(e.dur/60)+'분</td><td class="num"><button class="link" data-act="open-paper" data-id="'+e.id+'">시험지 보기</button> <button class="link del" data-act="del1" data-id="'+e.id+'">삭제</button></td></tr>').join('')+'</tbody></table><p class="muted">연습 삼아 제출한 시험은 「삭제」로 지우면 통계, 오답노트, 다시 나올 문제에서도 함께 빠집니다.</p></section><section class="card"><h2>기록 전체 지우기</h2><p class="muted">모든 시험 기록과 오답노트를 지우고 처음부터 다시 시작합니다. 되돌릴 수 없습니다.</p><div class="row"><button class="btn ghost" data-act="reset1">기록 모두 지우기</button><span id="resetbox"></span></div></section>';
+},
+paper(){
+  const e=cur||lastExam();if(!e)return VIEWS.papers();
+  return '<section class="card"><p class="eyebrow">'+(EX.indexOf(e)+1)+'회차 · '+e.date+'</p><h2>시험지 전체 · '+pct(e.score,e.n)+'점</h2><p class="muted">'+e.n+'문제 모두의 정답, 내가 고른 답, 해설입니다.</p><div class="row"><button class="btn" data-act="result">결과 요약</button><button class="btn" data-act="review">이 회차 오답노트</button><button class="btn ghost" data-act="papers">시험지 목록</button></div></section>'+e.items.filter(i=>QMAP[i.q]).map(i=>qcard(e,i,false)).join('');
+},
+notebook(){
+  const a=allNotes();
+  if(!a.length)return '<section class="card center"><h2>오답노트가 비어 있습니다</h2><p class="lead">시험에서 틀리거나 헷갈린다고 표시한 문제가 여기에 모입니다.</p><div class="row cjust"><button class="btn pri" data-act="start">시험 풀기</button></div></section>';
+  return '<section class="card"><h2>누적 오답노트 '+a.length+'문제</h2><p class="muted">지금까지 틀리거나 헷갈린 문제를 모두 모았습니다. 아직 통과하지 못한 문제, 많이 틀린 문제 순서입니다. 내 말로 적은 정리는 자동으로 저장됩니다.</p></section>'+a.map(x=>qcard(x.e,x.i,true)).join('');
+},
+memo(){
+  const a=allNotes();
+  if(!a.length)return '<section class="card center"><h2>암기노트가 비어 있습니다</h2><p class="lead">틀리거나 헷갈린 문제의 정답이 한 줄씩 여기에 모입니다.</p><div class="row cjust"><button class="btn pri" data-act="start">시험 풀기</button></div></section>';
+  const by={};a.forEach(x=>{const q=QMAP[x.i.q];(by[q.sec]||(by[q.sec]=[])).push(q)});
+  return '<section class="card"><h2>암기노트 '+a.length+'개</h2><p class="muted">질문을 보고 답을 떠올린 다음, 눌러서 정답을 확인하세요. 영역별로 묶었습니다.</p><div class="row"><button class="btn" data-act="memo-open">정답 모두 펼치기</button><button class="btn" data-act="memo-close">모두 접기</button><button class="btn" data-act="final">오늘 정리 보기</button></div></section>'+Object.keys(SEC).filter(k=>by[k]).map(k=>'<section class="card"><h2>'+SEC[k]+' <small class="muted">'+by[k].length+'개</small></h2>'+by[k].map(q=>{const d=(S.qs[q.base||q.id]||{}).d,n=(S.notes[q.id]||'').trim();return '<details class="mm"><summary>'+esc(q.stem)+(d?'':' <span class="chip good">통과</span>')+'</summary><p class="ma">'+esc(q.opts[0])+'</p><p class="mexp">'+esc(q.exp)+'</p>'+(n?'<p class="mnote"><b>내 정리</b> '+esc(n)+'</p>':'')+'<p class="mp">'+esc(loc(q))+'</p></details>'}).join('')+'</section>').join('');
+},
 home(){
   const le=lastExam(),due=BANK.filter(q=>(S.qs[q.id]||{}).d).length,td=EX.filter(e=>e.date===today());
   const unseen=BANK.filter(q=>!seen(q)).length;
   let prog='';
   if(P){const left=P.end-Date.now();prog='<div class="notice"><b>풀던 시험이 있습니다.</b> '+(left>0?'남은 시간 '+Math.ceil(left/60000)+'분, ':'시간이 끝났습니다. ')+Object.keys(P.ans).length+'문제에 답했습니다.<div class="row">'+(left>0?'<button class="btn pri" data-act="resume">이어서 풀기</button>':'<button class="btn pri" data-act="grade-now">지금 채점하기</button>')+'<button class="btn ghost" data-act="discard">이 시험 버리기</button></div></div>'}
-  return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 60문제 모의시험</h1>'+
-  '<p class="lead">5지선다 '+BANK.length+'문제 은행에서 매번 60문제를 냅니다. 틀린 문제는 두 번 연속 맞힐 때까지 다음 시험에 다시 나옵니다.</p><p class="muted">다음 시험 난이도는 <b>'+LVN[level()]+'</b>입니다. 최근 두 번의 평균이 75점 이상이면 어려워지고, 90점 이상이면 가장 어려워집니다. 점수가 내려가면 다시 쉬워집니다.</p>'+
+  return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 50문제 모의시험</h1>'+
+  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다. 틀린 문제는 두 번 연속 맞힐 때까지 다음 시험에 다시 나옵니다.</p><p class="muted">숫자를 묻는 문제와 옳지 않은 것을 고르는 문제처럼 헷갈리기 쉬운 문제를 항상 먼저 냅니다.</p>'+
   (P?prog:'<button class="btn pri big" data-act="start">시험 풀기</button>')+
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
   '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다시 나올 오답</span><b>'+due+'문제</b></div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
-  '<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 60문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
+  '<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
   '<div class="row">'+(le?'<button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제와 해설은 올려 주신 한글파일 1~22쪽 내용으로만 만들었습니다. 쪽 번호는 한글파일의 표 한 장을 한 쪽으로 센 것입니다.</p>';
 },
@@ -637,7 +670,7 @@ exam(){
 result(){
   const e=cur||lastExam();if(!e)return VIEWS.home();
   const p=pct(e.score,e.n),w=wrongOf(e),idx=EX.indexOf(e)+1,nw=e.items.filter(i=>!i.ok).length,nf=e.items.filter(i=>i.ok&&i.f).length;
-  return steps(1)+'<section class="card center"><p class="eyebrow">'+idx+'회차 · '+e.date+' · '+Math.floor(e.dur/60)+'분 '+(e.dur%60)+'초 · 난이도 '+LVN[e.lv||1]+'</p><div class="score '+(p===100?'perfect':'')+'">'+p+'<small>점</small></div><p class="lead">'+e.n+'문제 중 '+e.score+'문제를 맞혔습니다. '+(nw?'틀린 문제 '+nw+'개':'틀린 문제 없음')+(nf?', 맞았지만 헷갈린 문제 '+nf+'개':'')+'. '+(w.length?'이 문제들은 다음 시험에 다시 나옵니다.':'만점입니다. 이 상태를 시험 날까지 유지하면 됩니다.')+'</p><div class="row cjust"><button class="btn pri" data-act="'+(w.length?'review':'final')+'">'+(w.length?'오답노트로 가기':'오늘 정리로 가기')+'</button><button class="btn ghost" data-act="home">처음으로</button></div></section>'+
+  return steps(1)+'<section class="card center"><p class="eyebrow">'+idx+'회차 · '+e.date+' · '+Math.floor(e.dur/60)+'분 '+(e.dur%60)+'초</p><div class="score '+(p===100?'perfect':'')+'">'+p+'<small>점</small></div><p class="lead">'+e.n+'문제 중 '+e.score+'문제를 맞혔습니다. '+(nw?'틀린 문제 '+nw+'개':'틀린 문제 없음')+(nf?', 맞았지만 헷갈린 문제 '+nf+'개':'')+'. '+(nw?'100점까지 '+nw+'문제 남았습니다. ':'')+(w.length?'이 문제들은 다음 시험에 다시 나옵니다.':'만점입니다. 이 상태를 시험 날까지 유지하면 됩니다.')+'</p><div class="row cjust"><button class="btn pri" data-act="'+(w.length?'review':'final')+'">'+(w.length?'오답노트로 가기':'오늘 정리로 가기')+'</button><button class="btn" data-act="paper">시험지 전체 보기</button><button class="btn ghost" data-act="home">처음으로</button></div></section>'+
   '<section class="card"><h2>영역별 결과</h2>'+secTable(e.items)+'</section>'+
   '<section class="card"><h2>문항별 정오</h2><div class="ox">'+e.items.map((i,k)=>'<span class="'+(i.ok?'o':'x')+(i.f?' f':'')+'" title="'+esc((QMAP[i.q]||{}).stem||'')+'">'+(k+1)+'</span>').join('')+'</div><p class="muted">빨간 칸은 틀린 문제, 아래에 노란 줄이 있는 칸은 헷갈린다고 표시한 문제입니다.</p></section>';
 },
@@ -645,10 +678,7 @@ review(){
   const e=cur||lastExam();if(!e)return VIEWS.home();
   const w=wrongOf(e);
   return steps(2)+'<section class="card"><h2>오답노트 '+w.length+'문제</h2><p class="muted">틀린 문제와, 맞았어도 헷갈린다고 표시한 문제가 함께 들어 있습니다.</p><p class="lead">정답과 해설을 읽고, 한글파일의 해당 쪽을 직접 확인한 다음, 해설을 가리고 내 말로 다시 적어 보세요. 적은 내용은 자동으로 저장되고 오늘 정리에 모입니다.</p></section>'+
-  w.map(i=>{const q=QMAP[i.q],no=e.items.indexOf(i)+1,ord=(e.order&&e.order[q.id])||[0,1,2,3,4],s=S.qs[q.base||q.id]||{w:1};
-    return '<article class="card q"><div class="chips"><span class="chip">'+no+'번</span><span class="chip">'+SEC[q.sec]+'</span>'+(i.ok?'<span class="chip mid">맞았지만 헷갈림</span>':'')+(s.w>1?'<span class="chip bad">누적 '+s.w+'번째 오답</span>':'')+'</div><p class="stem">'+esc(q.stem)+'</p><ul class="opts static">'+ord.map((oi,k)=>'<li class="'+(oi===0?'right':oi===i.ch?'wrong':'')+'"><span class="n">'+NUM[k]+'</span>'+esc(q.opts[oi])+(oi===0?'<em>정답</em>':oi===i.ch?'<em>내가 고른 답</em>':'')+'</li>').join('')+'</ul>'+(i.ch<0?'<p class="muted">답을 고르지 않았습니다.</p>':'')+
-    '<div class="exp"><b>해설</b> '+esc(q.exp)+'</div><div class="loc"><b>확인할 곳</b> '+esc(loc(q))+'</div>'+
-    '<label class="notelabel" for="n-'+q.id+'">내 말로 다시 정리</label><textarea class="note" id="n-'+q.id+'" data-note="'+q.id+'" rows="3" placeholder="예: 굴곡형 손목장치는 30·50, 굽힘/돌림형은 25·50">'+esc(S.notes[q.id]||'')+'</textarea></article>'}).join('')+
+  w.map(i=>qcard(e,i,true)).join('')+
   '<div class="row cjust"><button class="btn pri" data-act="drill">이 문제들 다시 풀기</button><button class="btn ghost" data-act="final">건너뛰고 오늘 정리</button></div>';
 },
 drill(){
@@ -701,12 +731,14 @@ function drawQ(){
   $('#qbox').innerHTML='<article class="card q"><div class="chips"><span class="chip">'+(P.cur+1)+' / '+P.qids.length+'</span><button class="chip flagbtn'+(P.flag[id]?' on':'')+'" data-act="flag" aria-pressed="'+(P.flag[id]?'true':'false')+'">'+(P.flag[id]?'헷갈림 표시함':'헷갈려요')+'</button></div><p class="stem">'+(P.cur+1)+'. '+esc(q.stem)+'</p><ul class="opts">'+ord.map((oi,k)=>'<li><button class="opt'+(P.ans[id]===oi?' sel':'')+'" data-act="pick" data-i="'+oi+'"><span class="n">'+NUM[k]+'</span>'+esc(q.opts[oi])+'</button></li>').join('')+'</ul><div class="row between"><button class="btn" data-act="prev"'+(P.cur===0?' disabled':'')+'>이전</button><button class="btn pri" data-act="next">'+(P.cur===P.qids.length-1?'제출하기':'다음')+'</button></div></article>';
   $('#grid').innerHTML=P.qids.map((x,k)=>'<button class="g'+(k===P.cur?' cur':'')+(x in P.ans?' ans':'')+(P.flag[x]?' fl':'')+'" data-act="jump" data-i="'+k+'">'+(k+1)+'</button>').join('');
 }
-function askSubmit(){const un=P.qids.length-Object.keys(P.ans).length;$('#confirm').innerHTML='<div class="notice"><b>제출할까요?</b> '+(un?'아직 답하지 않은 문제가 '+un+'개 있습니다. 답하지 않은 문제는 오답으로 채점됩니다.':'60문제에 모두 답했습니다.')+'<div class="row"><button class="btn pri" data-act="submit">제출하고 채점</button><button class="btn ghost" data-act="cancel-submit">계속 풀기</button></div></div>';window.scrollTo(0,0)}
+function askSubmit(){const un=P.qids.length-Object.keys(P.ans).length;$('#confirm').innerHTML='<div class="notice"><b>제출할까요?</b> '+(un?'아직 답하지 않은 문제가 '+un+'개 있습니다. 답하지 않은 문제는 오답으로 채점됩니다.':'50문제에 모두 답했습니다.')+'<div class="row"><button class="btn pri" data-act="submit">제출하고 채점</button><button class="btn ghost" data-act="cancel-submit">계속 풀기</button></div></div>';window.scrollTo(0,0)}
 function startDrill(){const e=cur||lastExam(),ids=wrongOf(e).map(i=>i.q);drill={queue:shuffle(ids),total:ids.length,tries:0,picked:null,ord:null};if(drill.queue.length)drill.ord=shuffle([0,1,2,3,4]);go('drill')}
 function finalText(){const d=today(),td=EX.filter(e=>e.date===d),all=[];td.forEach(e=>wrongOf(e).forEach(i=>{if(!all.includes(i.q))all.push(i.q)}));let t='['+d+' 오늘 정리]\n점수: '+td.map(e=>e.score+'/'+e.n).join(', ')+'\n\n[외울 것]\n';all.forEach(id=>{const q=QMAP[id];t+='- '+q.stem+' → '+q.opts[0]+' ('+q.p+'쪽)\n';if((S.notes[id]||'').trim())t+='  내 정리: '+S.notes[id].trim()+'\n'});const f=(S.days[d]||{}).final;if(f)t+='\n[한 줄 정리]\n'+f+'\n';return t}
 
 const ACT={
-  start(){go('ready')},begin(){P=buildExam();saveProg();go('exam')},
+  start(){go('ready')},papers(){go('papers')},paper(){go('paper')},notebook(){go('notebook')},memo(){go('memo')},result(){go('result')},
+  'open-paper'(el){cur=EX.find(e=>e.id===el.dataset.id)||null;go('paper')},
+  'memo-open'(){document.querySelectorAll('details.mm').forEach(d=>d.open=true)},'memo-close'(){document.querySelectorAll('details.mm').forEach(d=>d.open=false)},begin(){P=buildExam();saveProg();go('exam')},
   resume(){go('exam')},
   'grade-now'(){grade()},
   discard(){P=null;saveProg();go('home')},
@@ -725,6 +757,8 @@ const ACT={
   'copy-final'(){const t=finalText(),done=()=>{$('#copied').textContent='복사했습니다'};try{navigator.clipboard.writeText(t).then(done,()=>{$('#copied').textContent='복사하지 못했습니다. 화면 내용을 직접 선택해 복사해 주세요'})}catch(e){$('#copied').textContent='복사하지 못했습니다. 화면 내용을 직접 선택해 복사해 주세요'}},
   backup(){const t=JSON.stringify({S,EX}),fail=()=>{$('#restore').value=t;$('#bk').textContent='자동 복사가 막혀 있습니다. 아래 칸의 내용을 전체 선택해 복사해 주세요'};try{navigator.clipboard.writeText(t).then(()=>{$('#bk').textContent='복사했습니다. 메모장에 붙여 넣어 보관하세요'},fail)}catch(e){fail()}},
   restore(){let d=null;try{d=JSON.parse($('#restore').value)}catch(e){}if(!d||!d.S||!d.S.qs||!Array.isArray(d.EX)){$('#bk').textContent='백업 내용이 올바르지 않습니다. 복사한 내용 전체를 붙여 넣었는지 확인해 주세요';return}S=Object.assign(BLANK(),d.S);EX=d.EX;EX.forEach(e=>{reg(e.syn);dbWrite('exams/'+e.id,e)});LS.set('exams',EX);saveCore();go('stats')},
+  del1(el){el.textContent='정말 삭제';el.dataset.act='del2'},
+  del2(el){const id=el.dataset.id;EX=EX.filter(e=>e.id!==id);(S.del||(S.del=[])).push(id);if(cur&&cur.id===id)cur=null;recompute();LS.set('exams',EX);saveCore();if(db){chain=chain.then(()=>db.doc('exams/'+id).delete()).catch(()=>{})}go('papers')},
   reset1(){$('#resetbox').innerHTML='<button class="btn danger" data-act="reset2">정말 지우기</button>'},
   reset2(){const old=EX.slice();S=BLANK();S.resetAt=Date.now();EX=[];P=null;cur=null;LS.set('exams',EX);saveProg();saveCore();if(db)old.forEach(e=>{chain=chain.then(()=>db.doc('exams/'+e.id).delete()).catch(()=>{})});go('home')}
 };
