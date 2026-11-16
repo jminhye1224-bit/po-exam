@@ -922,7 +922,7 @@ function buildExam(){
     Object.keys(W).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,HN-sum).forEach(k=>T[k]++)}
   const cnt=s=>picked.filter(x=>x.sec===s).length;
   const lim=(q,extra)=>isK(q)?KT[q.sec]:(T[q.sec]||0)+extra;
-  const add=(q,extra=0)=>{if(!q||has.has(q.id)||picked.length>=N)return false;if(cnt(q.sec)>=lim(q,extra))return false;has.add(q.id);picked.push(q);return true};
+  const add=(q,extra=0)=>{if(!q||has.has(q.id)||picked.length>=N)return false;{const st=S.qs[q.id];if(st&&st.d&&!dueNow(q))return false}if(cnt(q.sec)>=lim(q,extra))return false;has.add(q.id);picked.push(q);return true};
   const least=list=>shuffle(list).sort((a,b)=>(seen(a)-seen(b))||(lv>1?hard(b)-hard(a):0));
   /* 같은 영역 안에서는 아직 안 나온 주제를 먼저 → 주제가 골고루 */
   const spread=list=>{const used=new Set(picked.map(x=>x.topic));const l=least(list);return l.filter(q=>!used.has(q.topic)).concat(l.filter(q=>used.has(q.topic)))};
@@ -943,9 +943,11 @@ function buildExam(){
   const now=Date.now();
   return {id:'e'+now.toString(36),start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn,lv};
 }
-/* 틀리거나 헷갈린 문제는 바로 다음 회차는 건너뛰고 2회차 뒤에 다시 나온다(단기기억으로 맞히지 않게).
-   한 번 맞히면 다시 3회차 뒤에 한 번 더 확인하고, 두 번 연속 맞히면 오답에서 빠진다. k = 그 시험의 회차 번호(0부터) */
-function applyItem(i,k){const q=QMAP[i.q];if(!q)return;const s=stat(q.base||i.q);s.s++;if(i.ok&&i.f){s.st=0;s.d=1;s.nx=k+2}else if(i.ok){s.st++;if(s.d){if(s.st>=2)s.d=0;else s.nx=k+3}}else{s.w++;s.st=0;s.d=1;s.nx=k+2}}
+/* 틀리거나 헷갈린 문제는 2~6회차 뒤 중 무작위 회차에 다시 나온다(바로 다음 회차는 안 나옴 → 단기기억으로 맞히지 않게).
+   다시 맞혀도 한 번 더 2~6회차 뒤에 확인하고, 두 번 연속 맞히면 오답에서 빠진다.
+   k = 그 시험의 회차 번호(0부터). 간격은 문제·시험 번호로 정해서, 기록을 지워 다시 계산해도 같게 나온다. */
+const gap=(qid,eid)=>{let h=7;const t=qid+'|'+eid;for(let j=0;j<t.length;j++)h=(h*31+t.charCodeAt(j))>>>0;return 2+h%5};
+function applyItem(i,k,eid){const q=QMAP[i.q];if(!q)return;const id=q.base||i.q,s=stat(id);s.s++;const nx=k+gap(id,eid||'');if(i.ok&&i.f){s.st=0;s.d=1;s.nx=nx}else if(i.ok){s.st++;if(s.d){if(s.st>=2)s.d=0;else s.nx=nx}}else{s.w++;s.st=0;s.d=1;s.nx=nx}}
 /* 홈: 지금까지 푼 시험 전체 평균 */
 function overall(){
   if(!EX.length)return '';
@@ -963,12 +965,12 @@ function overall(){
   '<h3 class="ovh">영역별 정답률 (지금까지 전체)</h3>'+rows.map(bar).join('')+
   (weak.length?'<p class="muted">가장 약한 영역: <b>'+weak.map(r=>esc(SEC[r.k])+' '+r.p+'점').join(', ')+'</b>. 이 영역의 한글파일 쪽을 먼저 다시 읽어 보세요.</p>':'')+'</section>';
 }
-function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach((e,k)=>e.items.forEach(i=>applyItem(i,k)))}
+function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach((e,k)=>e.items.forEach(i=>applyItem(i,k,e.id)))}
 const dueNow=q=>{const s=S.qs[q.id];return !!(s&&s.d&&(s.nx||0)<=EX.length)};
 function grade(){
   if(!P)return;clearInterval(tick);
   const items=P.qids.filter(id=>QMAP[id]).map(id=>{const ch=(id in P.ans)?P.ans[id]:-1;return {q:id,ch,ok:ch===0?1:0,f:P.flag[id]?1:0}});
-  {const k=EX.length;items.forEach(i=>applyItem(i,k))}
+  {const k=EX.length;items.forEach(i=>applyItem(i,k,P.id))}
   const e={id:P.id,ts:Date.now(),date:today(),dur:Math.min(3600,Math.round((Date.now()-P.start)/1000)),score:items.filter(i=>i.ok).length,n:items.length,items,order:P.order,syn:P.syn||{},lv:P.lv||1};
   EX.push(e);if(HOOK){try{fetch(HOOK,{method:'POST',mode:'no-cors',body:JSON.stringify({pct:pct(e.score,e.n),score:e.score,n:e.n,wrong:e.n-e.score,flag:items.filter(i=>i.f).length,lv:LVN[e.lv],min:Math.round(e.dur/60)})}).catch(()=>{})}catch(x){}}P=null;saveProg();saveCore();saveExam(e);cur=e;go('result');
 }
@@ -1030,7 +1032,7 @@ home(){
   let prog='';
   if(P){const left=P.end-Date.now();prog='<div class="notice"><b>풀던 시험이 있습니다.</b> '+(left>0?'남은 시간 '+Math.ceil(left/60000)+'분, ':'시간이 끝났습니다. ')+Object.keys(P.ans).length+'문제에 답했습니다.<div class="row">'+(left>0?'<button class="btn pri" data-act="resume">이어서 풀기</button>':'<button class="btn pri" data-act="grade-now">지금 채점하기</button>')+'<button class="btn ghost" data-act="discard">이 시험 버리기</button></div></div>'}
   return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 50문제 모의시험</h1>'+
-  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다. 틀린 문제는 바로 다음 회차는 건너뛰고 2회차 뒤에 다시 나옵니다. 단기기억이 아니라 장기기억으로 맞히도록, 한 번 맞히면 3회차 뒤에 한 번 더 확인하고 두 번 연속 맞히면 오답에서 빠집니다.</p><p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p><p class="muted">50문제 중 42문제는 한글파일(교재 정리)에서, 정리 분량이 많은 영역일수록 더 많이 냅니다. 8문제는 국가시험 기출(2020~2025)로 출제 유형을 익힙니다. 「옳지 않은 것은?」 문제는 매번 10문제 정도 넣습니다.</p>'+
+  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다. 틀린 문제는 바로 다음 회차에는 나오지 않고, 2~6회차 뒤 중 무작위로 다시 나옵니다. 장기기억으로 맞히도록 맞혀도 다시 2~6회차 뒤에 한 번 더 확인하고, 두 번 연속 맞히면 오답에서 빠집니다.</p><p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p><p class="muted">50문제 중 42문제는 한글파일(교재 정리)에서, 정리 분량이 많은 영역일수록 더 많이 냅니다. 8문제는 국가시험 기출(2020~2025)로 출제 유형을 익힙니다. 「옳지 않은 것은?」 문제는 매번 10문제 정도 넣습니다.</p>'+
   (P?prog:'<button class="btn pri big" data-act="start">시험 풀기</button>')+
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
   '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다음 시험에 나올 오답</span><b>'+due+'문제</b>'+(wait?'<em>기다리는 오답 '+wait+'문제</em>':'')+'</div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
