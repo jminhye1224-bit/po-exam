@@ -62,7 +62,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px soli
 .ddayrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
 .ddayrow input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
 .dday{color:var(--accent);font-size:16px;font-variant-numeric:tabular-nums}
-.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.ovh{font-size:1rem;margin:16px 0 8px} .ovrow{display:grid;grid-template-columns:7.5em 1fr 3.2em 3.6em;gap:8px;align-items:center;margin:6px 0;font-size:.92em} .ovbar{height:10px;border-radius:999px;background:var(--tint,#eee);overflow:hidden} .ovbar i{display:block;height:100%;background:var(--accent,#3b6);border-radius:999px} .ovrow small{color:var(--muted,#888)} .card .tiles{margin-top:6px} .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
 .tile span{font-size:13px;color:var(--muted)} .tile b{font-size:22px;font-variant-numeric:tabular-nums} .tile em{font-style:normal;font-size:13px;color:var(--muted)}
 .tile.warn{border-color:var(--bad)} .tile.warn b{color:var(--bad)}
@@ -927,10 +927,10 @@ function buildExam(){
   /* 같은 영역 안에서는 아직 안 나온 주제를 먼저 → 주제가 골고루 */
   const spread=list=>{const used=new Set(picked.map(x=>x.topic));const l=least(list);return l.filter(q=>!used.has(q.topic)).concat(l.filter(q=>used.has(q.topic)))};
   /* 1) 틀렸던 문제: 두 번 연속 맞힐 때까지 다시 (영역마다 정해진 수보다 2문제까지만 더) */
-  const due=shuffle(BANK.filter(q=>(S.qs[q.id]||{}).d)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w);
+  const due=shuffle(BANK.filter(dueNow)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w);
   let nd=0;due.forEach(q=>{if(nd<22&&add(q,2))nd++});
   /* 2) 틀린 문제와 같은 주제의 비슷한 문제 */
-  let sib=0;due.filter(q=>has.has(q.id)).forEach(q=>{if(sib>=8)return;if(add(least(BANK.filter(x=>x.topic===q.topic&&!has.has(x.id)))[0],2))sib++});
+  let sib=0;shuffle(BANK.filter(q=>(S.qs[q.id]||{}).d)).forEach(q=>{if(sib>=8)return;if(add(least(BANK.filter(x=>x.topic===q.topic&&!has.has(x.id)))[0],2))sib++});
   /* 3) 보훈병원 시험에 나오는 「옳지 않은 것은?」 유형을 매번 10문제 정도 (영역 비율 안에서) */
   {let ng=picked.filter(isNeg).length;for(const q of spread(BANK.filter(q=>isNeg(q)&&!isK(q)&&!has.has(q.id)))){if(ng>=10)break;if(add(q))ng++}}
   /* 4) 영역별로 정해진 수까지 채우기 (덜 본 문제, 안 나온 주제부터) */
@@ -943,12 +943,32 @@ function buildExam(){
   const now=Date.now();
   return {id:'e'+now.toString(36),start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn,lv};
 }
-function applyItem(i){const q=QMAP[i.q];if(!q)return;const s=stat(q.base||i.q);s.s++;if(i.ok&&i.f){s.st=0;s.d=1}else if(i.ok){s.st++;if(s.d&&s.st>=2)s.d=0}else{s.w++;s.st=0;s.d=1}}
-function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach(e=>e.items.forEach(applyItem))}
+/* 틀리거나 헷갈린 문제는 바로 다음 회차는 건너뛰고 2회차 뒤에 다시 나온다(단기기억으로 맞히지 않게).
+   한 번 맞히면 다시 3회차 뒤에 한 번 더 확인하고, 두 번 연속 맞히면 오답에서 빠진다. k = 그 시험의 회차 번호(0부터) */
+function applyItem(i,k){const q=QMAP[i.q];if(!q)return;const s=stat(q.base||i.q);s.s++;if(i.ok&&i.f){s.st=0;s.d=1;s.nx=k+2}else if(i.ok){s.st++;if(s.d){if(s.st>=2)s.d=0;else s.nx=k+3}}else{s.w++;s.st=0;s.d=1;s.nx=k+2}}
+/* 홈: 지금까지 푼 시험 전체 평균 */
+function overall(){
+  if(!EX.length)return '';
+  const sc=EX.map(e=>pct(e.score,e.n)),avg=Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),best=Math.max(...sc);
+  const r3=sc.slice(-3),a3=Math.round(r3.reduce((a,b)=>a+b,0)/r3.length);
+  const first=sc.slice(0,Math.min(3,sc.length)),a0=Math.round(first.reduce((a,b)=>a+b,0)/first.length);
+  const all=[];EX.forEach(e=>e.items.forEach(i=>{const q=QMAP[i.q];if(q)all.push({q,ok:i.ok,f:i.f})}));
+  const tot=all.length,ok=all.filter(x=>x.ok).length,fl=all.filter(x=>x.f).length;
+  const by={};all.forEach(x=>{const k=x.q.sec;(by[k]=by[k]||{n:0,ok:0});by[k].n++;by[k].ok+=x.ok});
+  const rows=Object.keys(SEC).filter(k=>by[k]).map(k=>({k,n:by[k].n,p:pct(by[k].ok,by[k].n)}));
+  const weak=rows.filter(r=>r.n>=5).sort((a,b)=>a.p-b.p).slice(0,2);
+  const bar=r=>'<div class="ovrow"><span>'+esc(SEC[r.k])+'</span><div class="ovbar"><i style="width:'+r.p+'%"></i></div><b>'+r.p+'점</b><small>'+r.n+'문제</small></div>';
+  return '<section class="card"><h2>지금까지 전체 <small class="muted">'+EX.length+'회 · '+tot+'문제</small></h2>'+
+  '<div class="tiles"><div class="tile"><span>전체 평균</span><b>'+avg+'점</b></div><div class="tile"><span>최고 점수</span><b>'+best+'점</b></div><div class="tile"><span>최근 3회 평균</span><b>'+a3+'점</b>'+(EX.length>3?'<em>처음 3회 '+a0+'점 → '+(a3-a0>=0?'+':'')+(a3-a0)+'</em>':'')+'</div><div class="tile"><span>푼 문제 정답률</span><b>'+pct(ok,tot)+'%</b><em>'+ok+' / '+tot+' · 헷갈림 '+fl+'</em></div></div>'+
+  '<h3 class="ovh">영역별 정답률 (지금까지 전체)</h3>'+rows.map(bar).join('')+
+  (weak.length?'<p class="muted">가장 약한 영역: <b>'+weak.map(r=>esc(SEC[r.k])+' '+r.p+'점').join(', ')+'</b>. 이 영역의 한글파일 쪽을 먼저 다시 읽어 보세요.</p>':'')+'</section>';
+}
+function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach((e,k)=>e.items.forEach(i=>applyItem(i,k)))}
+const dueNow=q=>{const s=S.qs[q.id];return !!(s&&s.d&&(s.nx||0)<=EX.length)};
 function grade(){
   if(!P)return;clearInterval(tick);
   const items=P.qids.filter(id=>QMAP[id]).map(id=>{const ch=(id in P.ans)?P.ans[id]:-1;return {q:id,ch,ok:ch===0?1:0,f:P.flag[id]?1:0}});
-  items.forEach(applyItem);
+  {const k=EX.length;items.forEach(i=>applyItem(i,k))}
   const e={id:P.id,ts:Date.now(),date:today(),dur:Math.min(3600,Math.round((Date.now()-P.start)/1000)),score:items.filter(i=>i.ok).length,n:items.length,items,order:P.order,syn:P.syn||{},lv:P.lv||1};
   EX.push(e);if(HOOK){try{fetch(HOOK,{method:'POST',mode:'no-cors',body:JSON.stringify({pct:pct(e.score,e.n),score:e.score,n:e.n,wrong:e.n-e.score,flag:items.filter(i=>i.f).length,lv:LVN[e.lv],min:Math.round(e.dur/60)})}).catch(()=>{})}catch(x){}}P=null;saveProg();saveCore();saveExam(e);cur=e;go('result');
 }
@@ -1005,16 +1025,16 @@ memo(){
   return '<section class="card"><h2>암기노트 '+a.length+'개</h2><p class="muted">질문을 보고 답을 떠올린 다음, 눌러서 정답을 확인하세요. 영역별로 묶었습니다.</p><div class="row"><button class="btn" data-act="memo-open">정답 모두 펼치기</button><button class="btn" data-act="memo-close">모두 접기</button><button class="btn" data-act="final">오늘 정리 보기</button><button class="btn pri" data-act="kfacts">기출 숫자·도구·정렬 정리</button></div></section>'+Object.keys(SEC).filter(k=>by[k]).map(k=>'<section class="card"><h2>'+SEC[k]+' <small class="muted">'+by[k].length+'개</small></h2>'+by[k].map(q=>{const d=(S.qs[q.base||q.id]||{}).d,n=(S.notes[q.id]||'').trim();return '<details class="mm"><summary>'+esc(q.stem)+(d?'':' <span class="chip good">통과</span>')+'</summary>'+qimg(q)+'<p class="ma">'+esc(q.opts[0])+'</p><p class="mexp">'+esc(q.exp)+'</p>'+cx(q)+(n?'<p class="mnote"><b>내 정리</b> '+esc(n)+'</p>':'')+'<p class="mp">'+esc(loc(q))+'</p></details>'}).join('')+'</section>').join('');
 },
 home(){
-  const le=lastExam(),due=BANK.filter(q=>(S.qs[q.id]||{}).d).length,td=EX.filter(e=>e.date===today());
+  const le=lastExam(),due=BANK.filter(dueNow).length,wait=BANK.filter(q=>(S.qs[q.id]||{}).d).length-due,td=EX.filter(e=>e.date===today());
   const unseen=BANK.filter(q=>!seen(q)).length;
   let prog='';
   if(P){const left=P.end-Date.now();prog='<div class="notice"><b>풀던 시험이 있습니다.</b> '+(left>0?'남은 시간 '+Math.ceil(left/60000)+'분, ':'시간이 끝났습니다. ')+Object.keys(P.ans).length+'문제에 답했습니다.<div class="row">'+(left>0?'<button class="btn pri" data-act="resume">이어서 풀기</button>':'<button class="btn pri" data-act="grade-now">지금 채점하기</button>')+'<button class="btn ghost" data-act="discard">이 시험 버리기</button></div></div>'}
   return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 50문제 모의시험</h1>'+
-  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다. 틀린 문제는 두 번 연속 맞힐 때까지 다음 시험에 다시 나옵니다.</p><p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p><p class="muted">50문제 중 42문제는 한글파일(교재 정리)에서, 정리 분량이 많은 영역일수록 더 많이 냅니다. 8문제는 국가시험 기출(2020~2025)로 출제 유형을 익힙니다. 「옳지 않은 것은?」 문제는 매번 10문제 정도 넣습니다.</p>'+
+  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다. 틀린 문제는 바로 다음 회차는 건너뛰고 2회차 뒤에 다시 나옵니다. 단기기억이 아니라 장기기억으로 맞히도록, 한 번 맞히면 3회차 뒤에 한 번 더 확인하고 두 번 연속 맞히면 오답에서 빠집니다.</p><p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p><p class="muted">50문제 중 42문제는 한글파일(교재 정리)에서, 정리 분량이 많은 영역일수록 더 많이 냅니다. 8문제는 국가시험 기출(2020~2025)로 출제 유형을 익힙니다. 「옳지 않은 것은?」 문제는 매번 10문제 정도 넣습니다.</p>'+
   (P?prog:'<button class="btn pri big" data-act="start">시험 풀기</button>')+
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
-  '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다시 나올 오답</span><b>'+due+'문제</b></div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
-  '<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
+  '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다음 시험에 나올 오답</span><b>'+due+'문제</b>'+(wait?'<em>기다리는 오답 '+wait+'문제</em>':'')+'</div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
+  overall()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
   '<div class="row">'+(le?'<button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제는 한글파일 1~22쪽 내용과 2020~2025년 국가시험 기출(보조기학·의지학)로 이루어져 있습니다. 한글파일 쪽 번호는 표 한 장을 한 쪽으로 센 것이고, 기출 문제는 회차와 문제 번호를 함께 보여 줍니다.</p>';
 },
