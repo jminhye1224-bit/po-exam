@@ -62,7 +62,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px soli
 .ddayrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:14px;color:var(--muted)}
 .ddayrow input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;background:var(--surface);color:var(--ink)}
 .dday{color:var(--accent);font-size:16px;font-variant-numeric:tabular-nums}
-.ovh{font-size:1rem;margin:16px 0 8px} .ovrow{display:grid;grid-template-columns:7.5em 1fr 3.2em 3.6em;gap:8px;align-items:center;margin:6px 0;font-size:.92em} .ovbar{height:10px;border-radius:999px;background:var(--tint,#eee);overflow:hidden} .ovbar i{display:block;height:100%;background:var(--accent,#3b6);border-radius:999px} .ovrow small{color:var(--muted,#888)} .card .tiles{margin-top:6px} .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
+.ab{padding:10px 0;border-top:1px solid var(--line,#e5e5e5)} .ab:first-of-type{border-top:0} .abh{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;margin-bottom:6px} .abh small{color:var(--muted,#888)} .abq{margin-left:auto;font-weight:600;font-size:.92em} .abr{display:grid;grid-template-columns:5.5em 1fr 7.5em;gap:8px;align-items:center;font-size:.86em;margin:3px 0} .abr em{font-style:normal;text-align:right;color:var(--muted,#777)} .ovbar.ok i{background:var(--good,#2f9e6e)} .ovh{font-size:1rem;margin:16px 0 8px} .ovrow{display:grid;grid-template-columns:7.5em 1fr 3.2em 3.6em;gap:8px;align-items:center;margin:6px 0;font-size:.92em} .ovbar{height:10px;border-radius:999px;background:var(--tint,#eee);overflow:hidden} .ovbar i{display:block;height:100%;background:var(--accent,#3b6);border-radius:999px} .ovrow small{color:var(--muted,#888)} .card .tiles{margin-top:6px} .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
 .tile span{font-size:13px;color:var(--muted)} .tile b{font-size:22px;font-variant-numeric:tabular-nums} .tile em{font-style:normal;font-size:13px;color:var(--muted)}
 .tile.warn{border-color:var(--bad)} .tile.warn b{color:var(--bad)}
@@ -1228,7 +1228,9 @@ const SEC={A:'절단 총론',B:'절단 후 관리·처방',C:'팔 의지',D:'다
 const HOOK='';
 const NUM=['①','②','③','④','⑤'];
 function hash(s){let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))>>>0;return 'k'+h.toString(36)}
-const QMAP={};BANK.forEach(q=>{q.id=hash(q.sec+(q.src||'')+q.stem);QMAP[q.id]=q});
+const QMAP={};/* 실제 시험에 안 나오는 「~의 연결이 옳은 것은?」 짝짓기 유형은 빼기 */
+for(let i=BANK.length-1;i>=0;i--)if(/(연결이|연결로) 옳/.test(BANK[i].stem))BANK.splice(i,1);
+BANK.forEach(q=>{q.id=hash(q.sec+(q.src||'')+q.stem);QMAP[q.id]=q});
 /* 표기를 국가시험 기출에 맞춤(문제 id가 정해진 뒤에 바꿈): 숫자와 단위 띄우기, 문장형 보기는 마침표로 끝내기 */
 const UNIT=t=>t.replace(/(\d)(cm|mm|kg)(?![a-z])/g,'$1 $2');BANK.forEach(q=>{q.stem=UNIT(q.stem);q.opts=q.opts.map(o=>{o=UNIT(o);return /[다]$/.test(o)?o+'.':o});if(q.exp)q.exp=UNIT(q.exp)});
 const qimg=q=>q.img&&KIMG[q.img]?'<figure class="qimg"><img src="'+KIMG[q.img]+'" alt="문제 그림"></figure>':'';
@@ -1286,10 +1288,7 @@ function buildExam(){
   /* 한 시험 구성: 한글파일(교재 정리) 42문제 + 기출 8문제.
      한글파일 영역은 정리 분량(쪽·단 수) 비율대로 나눈다. 내용이 많은 영역일수록 문제가 많다. */
   const isK=q=>q.sec==='K1'||q.sec==='K2';
-  const W={A:3,B:2,C:11,D:7,E:2,F:8,G:6,H:8,I:4,J:5,L:4},KT={K1:4,K2:4},HN=N-8;
-  const T=Object.assign({},KT);{const tot=Object.values(W).reduce((x,y)=>x+y,0),raw={};let sum=0;
-    for(const k in W){raw[k]=HN*W[k]/tot;T[k]=Math.floor(raw[k]);sum+=T[k]}
-    Object.keys(W).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,HN-sum).forEach(k=>T[k]++)}
+  const KT={K1:4,K2:4},T=secPlan(N);
   const cnt=s=>picked.filter(x=>x.sec===s).length;
   const lim=(q,extra)=>isK(q)?KT[q.sec]:(T[q.sec]||0)+extra;
   const add=(q,extra=0)=>{if(!q||has.has(q.id)||picked.length>=N)return false;{const st=S.qs[q.id];if(st&&st.d&&!dueNow(q))return false}if(cnt(q.sec)>=lim(q,extra))return false;has.add(q.id);picked.push(q);return true};
@@ -1321,6 +1320,26 @@ function buildExam(){
 const gap=(qid,eid)=>{let h=7;const t=qid+'|'+eid;for(let j=0;j<t.length;j++)h=(h*31+t.charCodeAt(j))>>>0;return 2+h%5};
 function applyItem(i,k,eid){const q=QMAP[i.q];if(!q)return;const id=q.base||i.q,s=stat(id);s.s++;const nx=k+gap(id,eid||'');if(i.ok&&i.f){s.st=0;s.d=1;s.nx=nx}else if(i.ok){s.st++;if(s.d){if(s.st>=2)s.d=0;else s.nx=nx}}else{s.w++;s.st=0;s.d=1;s.nx=nx}}
 /* 홈: 지금까지 푼 시험 전체 평균 */
+/* 한 시험의 영역별 문제 수: 한글파일 42문제는 정리 분량(쪽·단 수) 비율대로, 기출 8문제는 4·4 */
+const SECW={A:3,B:2,C:11,D:7,E:2,F:8,G:6,H:8,I:4,J:5,L:4};
+function secPlan(N){const W=SECW,HN=N-8,T={K1:4,K2:4};const tot=Object.values(W).reduce((x,y)=>x+y,0),raw={};let sum=0;
+  for(const k in W){raw[k]=HN*W[k]/tot;T[k]=Math.floor(raw[k]);sum+=T[k]}
+  Object.keys(W).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,HN-sum).forEach(k=>T[k]++);return T}
+/* 홈: 전체 영역을 한눈에 — 매회 출제 수, 지금까지 풀어본 비율, 정답률 */
+function areaBoard(){
+  const T=secPlan(50),seen={},ans={},ok={},cnt={},pg={};
+  BANK.forEach(q=>{cnt[q.sec]=(cnt[q.sec]||0)+1;if(q.p){const r=pg[q.sec]||(pg[q.sec]=[99,0]);r[0]=Math.min(r[0],q.p);r[1]=Math.max(r[1],q.p)}});
+  EX.forEach(e=>e.items.forEach(i=>{const q=QMAP[i.q];if(!q)return;(seen[q.sec]=seen[q.sec]||new Set()).add(q.id);ans[q.sec]=(ans[q.sec]||0)+1;ok[q.sec]=(ok[q.sec]||0)+(i.ok?1:0)}));
+  const row=k=>{const sn=seen[k]?seen[k].size:0,sp=pct(sn,cnt[k]),cp=ans[k]?pct(ok[k],ans[k]):null,where=pg[k]?(pg[k][0]===pg[k][1]?pg[k][0]+'쪽':pg[k][0]+'~'+pg[k][1]+'쪽'):'2020~2025';
+    return '<div class="ab"><div class="abh"><b>'+esc(SEC[k])+'</b><small>'+where+'</small><span class="abq">매회 '+T[k]+'문제 <small>('+Math.round(T[k]*2)+'%)</small></span></div>'+
+    '<div class="abr"><span>풀어본 문제</span><div class="ovbar"><i style="width:'+sp+'%"></i></div><em>'+sn+' / '+cnt[k]+' ('+sp+'%)</em></div>'+
+    '<div class="abr"><span>정답률</span><div class="ovbar ok"><i style="width:'+(cp||0)+'%"></i></div><em>'+(cp===null?'아직 없음':cp+'% <small>('+ok[k]+'/'+ans[k]+')</small>')+'</em></div></div>'};
+  const hk=Object.keys(SEC).filter(k=>!/^K/.test(k)),kk=Object.keys(SEC).filter(k=>/^K/.test(k));
+  const tq=BANK.length,ts=Object.values(seen).reduce((a,s)=>a+s.size,0);
+  return '<section class="card"><h2>영역 한눈에 보기 <small class="muted">'+Object.keys(SEC).length+'개 영역 · '+tq+'문제</small></h2>'+
+  '<p class="muted">매회 50문제 중 각 영역에서 몇 문제가 나오는지, 지금까지 그 영역 문제를 얼마나 풀어 봤는지, 맞힌 비율이 얼마인지 보여 줍니다. 지금까지 전체 문제의 '+pct(ts,tq)+'%('+ts+'문제)를 풀어 봤습니다.</p>'+
+  '<h3 class="ovh">한글파일 (매회 42문제)</h3>'+hk.map(row).join('')+'<h3 class="ovh">국가시험 기출 (매회 8문제)</h3>'+kk.map(row).join('')+'</section>';
+}
 function overall(){
   if(!EX.length)return '';
   const sc=EX.map(e=>pct(e.score,e.n)),avg=Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),best=Math.max(...sc);
@@ -1334,7 +1353,7 @@ function overall(){
   const bar=r=>'<div class="ovrow"><span>'+esc(SEC[r.k])+'</span><div class="ovbar"><i style="width:'+r.p+'%"></i></div><b>'+r.p+'점</b><small>'+r.n+'문제</small></div>';
   return '<section class="card"><h2>지금까지 전체 <small class="muted">'+EX.length+'회 · '+tot+'문제</small></h2>'+
   '<div class="tiles"><div class="tile"><span>전체 평균</span><b>'+avg+'점</b></div><div class="tile"><span>최고 점수</span><b>'+best+'점</b></div><div class="tile"><span>최근 3회 평균</span><b>'+a3+'점</b>'+(EX.length>3?'<em>처음 3회 '+a0+'점 → '+(a3-a0>=0?'+':'')+(a3-a0)+'</em>':'')+'</div><div class="tile"><span>푼 문제 정답률</span><b>'+pct(ok,tot)+'%</b><em>'+ok+' / '+tot+' · 헷갈림 '+fl+'</em></div></div>'+
-  '<h3 class="ovh">영역별 정답률 (지금까지 전체)</h3>'+rows.map(bar).join('')+
+  
   (weak.length?'<p class="muted">가장 약한 영역: <b>'+weak.map(r=>esc(SEC[r.k])+' '+r.p+'점').join(', ')+'</b>. 이 영역의 한글파일 쪽을 먼저 다시 읽어 보세요.</p>':'')+'</section>';
 }
 function recompute(){S.qs={};EX.sort((a,b)=>a.ts-b.ts).forEach((e,k)=>e.items.forEach(i=>applyItem(i,k,e.id)))}
@@ -1408,7 +1427,7 @@ home(){
   (P?prog:'<button class="btn pri big" data-act="start">시험 풀기</button>')+
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
   '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다음 시험에 나올 오답</span><b>'+due+'문제</b>'+(wait?'<em>기다리는 오답 '+wait+'문제</em>':'')+'</div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
-  overall()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
+  overall()+areaBoard()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
   '<div class="row">'+(le?'<button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제는 한글파일 1~29쪽 내용과 2020~2025년 국가시험 기출(보조기학·의지학)로 이루어져 있습니다. 한글파일 쪽 번호는 표 한 장을 한 쪽으로 센 것이고, 기출 문제는 회차와 문제 번호를 함께 보여 줍니다.</p>';
 },
@@ -1471,8 +1490,8 @@ stats(){
   return '<section class="card"><h2>회차별 점수</h2><p class="muted">100점 환산 점수입니다. 위 선이 목표인 100점입니다.</p>'+chart+'<ul class="exlist">'+EX.slice().reverse().map(e=>'<li><button class="link" data-act="open" data-id="'+e.id+'">'+(EX.indexOf(e)+1)+'회차 · '+e.date+' · '+e.score+' / '+e.n+' · '+Math.floor(e.dur/60)+'분</button></li>').join('')+'</ul></section>'+
   '<section class="card"><h2>영역별 누적 정답률</h2>'+secTable(items)+'</section>'+
   '<section class="card"><h2>많이 틀리는 주제</h2>'+(weakT.length?'<table class="tbl"><thead><tr><th>주제</th><th>영역</th><th class="num">오답</th><th class="num">출제</th></tr></thead><tbody>'+weakT.map(k=>'<tr><td>'+esc(k)+'</td><td>'+SEC[tp[k].sec]+'</td><td class="num bad">'+tp[k].w+'</td><td class="num">'+tp[k].n+'</td></tr>').join('')+'</tbody></table>':'<p class="lead">아직 틀린 문제가 없습니다.</p>')+'</section>'+
-  '<section class="card"><h2>오답이 많은 쪽</h2>'+(pl.length?'<table class="tbl"><tbody>'+pl.map(p=>'<tr><td>한글파일 '+p+'쪽</td><td class="num">'+pg[p]+'개</td><td class="barcell">'+bar(pct(pg[p],pmax),'bad')+'</td></tr>').join('')+'</tbody></table>':'<p class="lead">아직 틀린 문제가 없습니다.</p>')+'</section>'+
-  '<section class="card"><h2>가장 많이 틀린 문제</h2>'+(worst.length?'<ul class="memo">'+worst.map(q=>'<li><span class="mq">'+esc(q.stem)+'</span><span class="ma">'+esc(q.opts[0])+'</span><span class="mp">'+S.qs[q.id].w+'번 틀림 · '+q.p+'쪽'+(S.qs[q.id].d?'':' · 통과')+'</span></li>').join('')+'</ul>':'<p class="lead">아직 틀린 문제가 없습니다.</p>')+'</section>'+
+  '<section class="card"><h2>오답이 많은 쪽</h2>'+(pl.length?'<table class="tbl"><tbody>'+pl.map(p=>'<tr><td>'+(+p?'한글파일 '+p+'쪽':'국가시험 기출')+'</td><td class="num">'+pg[p]+'개</td><td class="barcell">'+bar(pct(pg[p],pmax),'bad')+'</td></tr>').join('')+'</tbody></table>':'<p class="lead">아직 틀린 문제가 없습니다.</p>')+'</section>'+
+  '<section class="card"><h2>가장 많이 틀린 문제</h2>'+(worst.length?'<ul class="memo">'+worst.map(q=>'<li><span class="mq">'+esc(q.stem)+'</span><span class="ma">'+esc(q.opts[0])+'</span><span class="mp">'+S.qs[q.id].w+'번 틀림 · '+(q.p?q.p+'쪽':(q.src||'기출'))+(S.qs[q.id].d?'':' · 통과')+'</span></li>').join('')+'</ul>':'<p class="lead">아직 틀린 문제가 없습니다.</p>')+'</section>'+
   '<section class="card"><h2>기록 백업</h2><p class="muted">기록을 글자로 복사해 메모장 등에 보관해 두면, 기록이 사라졌을 때 아래 칸에 붙여 넣어 되살릴 수 있습니다.</p><div class="row"><button class="btn" data-act="backup">백업 내용 복사</button><span class="muted" id="bk"></span></div><label class="notelabel" for="restore">복원할 백업 내용</label><textarea class="note" id="restore" rows="3" placeholder="복사해 둔 백업 내용을 여기에 붙여 넣으세요"></textarea><div class="row"><button class="btn" data-act="restore">이 내용으로 복원</button></div></section>'+
   '<section class="card"><h2>기록 지우기</h2><p class="muted">모든 시험 기록과 오답노트를 지웁니다. 되돌릴 수 없습니다.</p><div class="row"><button class="btn ghost" data-act="reset1">기록 모두 지우기</button><span id="resetbox"></span></div></section>'+
   '<div class="row cjust"><button class="btn pri" data-act="home">처음으로</button></div>';
