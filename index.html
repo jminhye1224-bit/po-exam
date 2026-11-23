@@ -1246,8 +1246,78 @@ const pct=(a,b)=>b?Math.round(a/b*100):0;
 const clone=o=>JSON.parse(JSON.stringify(o));
 
 /* ----- 시험 전 응원과 말씀 ----- */
-const CHEER=['예담아~ 하나님이 가장 선한 길로 인도하실 거야!','예담아, 오늘도 한 걸음이면 충분해. 지금까지 한 만큼 분명히 쌓였어!','예담아, 떨릴 땐 숨 한 번 크게 쉬고. 아는 만큼만 차분하게 풀면 돼!','예담아, 틀려도 괜찮아. 오늘 틀린 건 시험 날 맞히라고 미리 나온 거야!','예담아, 네가 애쓴 시간을 하나님이 다 아셔. 끝까지 같이 가자!','예담아, 오늘의 50문제도 합격으로 가는 길 위에 있어. 힘내!','예담아, 결과는 맡기고 오늘은 눈앞의 한 문제에만 집중하자!'];
-const VERSES=[['잠언 3:5-6','너는 마음을 다하여 여호와를 의뢰하고 네 명철을 의지하지 말라 너는 범사에 그를 인정하라 그리하면 네 길을 지도하시리라'],['야고보서 1:5','너희 중에 누구든지 지혜가 부족하거든 모든 사람에게 후히 주시고 꾸짖지 아니하시는 하나님께 구하라 그리하면 주시리라'],['빌립보서 4:13','내게 능력 주시는 자 안에서 내가 모든 것을 할 수 있느니라'],['잠언 16:3','너의 행사를 여호와께 맡기라 그리하면 너의 경영하는 것이 이루리라'],['이사야 41:10','두려워 말라 내가 너와 함께 함이니라 놀라지 말라 나는 네 하나님이 됨이니라 내가 너를 굳세게 하리라 참으로 너를 도와 주리라 참으로 나의 의로운 오른손으로 너를 붙들리라'],['히브리서 11:1','믿음은 바라는 것들의 실상이요 보지 못하는 것들의 증거니'],['잠언 2:6','대저 여호와는 지혜를 주시며 지식과 명철을 그 입에서 내심이며'],['여호수아 1:9','내가 네게 명한 것이 아니냐 마음을 강하게 하고 담대히 하라 두려워 말며 놀라지 말라 네가 어디로 가든지 네 하나님 여호와가 너와 함께 하느니라'],['시편 37:5','너의 길을 여호와께 맡기라 저를 의지하면 저가 이루시고'],['로마서 8:28','우리가 알거니와 하나님을 사랑하는 자 곧 그 뜻대로 부르심을 입은 자들에게는 모든 것이 합력하여 선을 이루느니라'],['잠언 9:10','여호와를 경외하는 것이 지혜의 근본이요 거룩하신 자를 아는 것이 명철이니라'],['예레미야 29:11','나 여호와가 말하노라 너희를 향한 나의 생각은 내가 아나니 재앙이 아니라 곧 평안이요 너희 장래에 소망을 주려 하는 생각이라'],['디모데후서 1:7','하나님이 우리에게 주신 것은 두려워하는 마음이 아니요 오직 능력과 사랑과 근신하는 마음이니'],['시편 46:1','하나님은 우리의 피난처시요 힘이시니 환난 중에 만날 큰 도움이시라']];
+/* 응원과 말씀 — 시험 마지막 일주일용(2026-11-22 새로 씀). 시험을 볼 때마다 다음 순서로 바뀌어 같은 문구가 반복되지 않는다. */
+const CHEER=['예담아, 이제 일주일이야. 이 일주일은 결과를 붙잡는 시간이 아니라 하나님 손을 붙잡는 시간이야. 오늘도 그 손 꼭 잡고 시작하자!',
+'예담아, 시험 날까지의 모든 걸음을 하나님께 드리자. 문제 하나 푸는 이 시간도 하나님께 드리는 예배가 될 수 있어.',
+'예담아, 앞으로 30년의 길이 이 일주일에 달린 것처럼 느껴질 거야. 그런데 그 30년을 먼저 보고 계신 분은 하나님이셔. 우리는 오늘 하루만 충실하면 돼.',
+'예담아, 떨리는 마음까지 하나님께 그대로 가져가자. "하나님, 저 떨려요. 그래도 주님을 믿어요." 그 고백이면 충분해.',
+'예담아, 지혜는 하나님께서 주시는 거래. 오늘 시험 시작 전에 짧게 기도하자. "하나님, 오늘 제게 지혜를 주세요."',
+'예담아, 지금까지 28번 넘게 풀어 온 시간은 하나도 헛되지 않았어. 하나님이 그 모든 시간을 기억하고 계셔.',
+'예담아, 하나님이 이끄실 예담이의 삶이 정말 기대돼. 보훈병원 문 앞까지도, 그 너머까지도 주님이 앞서 가실 거야.',
+'예담아, 내 힘으로 100점을 만드는 게 아니라, 하나님이 주신 힘으로 최선을 다하는 거야. 결과는 주님께 맡기자.',
+'예담아, 긴장되면 문제 앞에서 숨 한 번 크게 쉬고 속으로 말해 봐. "주님이 저와 함께 계세요." 그리고 천천히 읽자.',
+'예담아, 이 일주일 동안 예담이의 시간, 마음, 손과 머리를 다 하나님께 드리자. 드린 것은 하나님이 반드시 책임지셔.',
+'예담아, 하나님은 예담이가 환자분들을 섬길 그날을 이미 준비하고 계셔. 지금 외우는 한 줄 한 줄이 언젠가 누군가를 걷게 할 거야.',
+'예담아, 비교하지 말자. 다른 사람이 아니라 어제의 예담이보다 한 걸음만 더 가면 돼. 그 한 걸음을 하나님이 기뻐하셔.',
+'예담아, 틀린 문제는 하나님이 미리 보여 주시는 선물이야. 시험장 전에 여기서 틀린 게 감사한 일이야!',
+'예담아, 마음이 조급해질 때마다 기억하자. 하나님의 때는 늦지도 빠르지도 않아. 지금 이 자리가 딱 맞는 자리야.',
+'예담아, 오늘도 "주님 뜻대로 하세요"라고 고백하고 시작하자. 그 고백 위에 세운 길은 흔들리지 않아.',
+'예담아, 피곤하지? 독수리처럼 새 힘 주시는 하나님께 오늘 필요한 힘을 구하자. 달려도 지치지 않게 하실 거야.',
+'예담아, 하나님은 예담이의 성적표보다 예담이의 마음을 먼저 보셔. 그 마음 그대로 오늘도 성실하게 하자.',
+'예담아, 시험장에 들어가는 날에도 혼자가 아니야. 하나님이 먼저 그 자리에 가 계실 거야. 미리 감사하자!',
+'예담아, 기억이 안 나는 문제를 만나도 당황하지 말자. 아는 문제부터 차분히, 하나님이 생각나게 하실 거야.',
+'예담아, 이 길이 하나님이 여신 문이라면 아무도 닫을 수 없어. 그러니 두려움 대신 기대하는 마음으로 가자.',
+'예담아, 하나님께 내 삶을 드린다는 건 거창한 게 아니야. 오늘 이 50문제를 정직하게, 끝까지 푸는 것도 드림이야.',
+'예담아, 일주일 남은 지금, 걱정은 기도로 바꾸고 불안은 감사로 바꾸자. 하나님이 마음을 지켜 주실 거야.',
+'예담아, 하나님이 주신 머리와 손을 믿어. 지금까지 쌓은 것은 시험장에서도 그대로 꺼내 쓸 수 있어.',
+'예담아, 오늘 하루를 마치면서 "하나님, 오늘도 최선을 다했어요"라고 말할 수 있으면 그걸로 충분해.',
+'예담아, 30년의 미래는 일주일 동안 예담이가 다 짊어지는 게 아니야. 그 무게는 하나님이 지시고, 예담이는 오늘을 걷는 거야.',
+'예담아, 지혜가 부족하다고 느껴질 때가 바로 하나님께 구할 때야. 꾸짖지 않으시고 후히 주시는 분이셔.',
+'예담아, 시험 결과가 예담이의 가치를 정하지 않아. 예담이는 이미 하나님의 귀한 자녀야. 그 마음으로 편하게 풀자.',
+'예담아, 마지막 일주일은 새로 많이 외우기보다 틀린 것을 확실히 하는 시간이야. 오답노트 한 장이 1점을 지켜 줘.',
+'예담아, 하나님이 예담이를 이 자리까지 부르신 데는 이유가 있어. 그 부르심을 믿고 끝까지 가자!',
+'예담아, 마음이 흔들릴 때는 말씀 한 구절을 붙잡자. 말씀이 발의 등이 되고 길의 빛이 되어 줄 거야.',
+'예담아, 하루하루 하나님께 맡기며 걸었더니 벌써 여기까지 왔어. 남은 며칠도 똑같이 맡기면 돼.',
+'예담아, 시험 전날 밤에는 잘 자는 것도 믿음이야. 하나님이 사랑하시는 자에게는 잠을 주신대.',
+'예담아, 우리가 할 일은 심고 물 주는 것, 자라게 하시는 분은 하나님이셔. 오늘도 성실하게 심자!',
+'예담아, 이 시험을 통해 예담이의 삶이 하나님께 더 가까이 드려지길 기도해. 합격보다 더 큰 은혜가 기다리고 있을 거야.',
+'예담아, 끝까지 힘내! 하나님이 가장 선한 길로 인도하실 거야. 우리는 그 길을 기대하며 걸으면 돼.'];
+const VERSES=[['로마서 12:1','그러므로 형제들아 내가 하나님의 모든 자비하심으로 너희를 권하노니 너희 몸을 하나님이 기뻐하시는 거룩한 산 제사로 드리라 이는 너희의 드릴 영적 예배니라'],
+['잠언 16:9','사람이 마음으로 자기의 길을 계획할지라도 그 걸음을 인도하는 자는 여호와시니라'],
+['야고보서 1:5','너희 중에 누구든지 지혜가 부족하거든 모든 사람에게 후히 주시고 꾸짖지 아니하시는 하나님께 구하라 그리하면 주시리라'],
+['빌립보서 4:6-7','아무 것도 염려하지 말고 다만 모든 일에 기도와 간구로 너희 구할 것을 감사함으로 하나님께 아뢰라 그리하면 모든 지각에 뛰어난 하나님의 평강이 그리스도 예수 안에서 너희 마음과 생각을 지키시리라'],
+['시편 37:5','너의 길을 여호와께 맡기라 저를 의지하면 저가 이루시고'],
+['다니엘 2:21','그는 때와 기한을 변하시며 왕들을 폐하시고 왕들을 세우시며 지혜자에게 지혜를 주시고 지식자에게 총명을 주시는도다'],
+['골로새서 3:23','무슨 일을 하든지 마음을 다하여 주께 하듯 하고 사람에게 하듯 하지 말라'],
+['이사야 26:3','주께서 심지가 견고한 자를 평강에 평강으로 지키시리니 이는 그가 주를 의뢰함이니이다'],
+['시편 90:12','우리에게 우리 날 계수함을 가르치사 지혜의 마음을 얻게 하소서'],
+['갈라디아서 2:20','내가 그리스도와 함께 십자가에 못 박혔나니 그런즉 이제는 내가 산 것이 아니요 오직 내 안에 그리스도께서 사신 것이라'],
+['여호수아 1:9','내가 네게 명한 것이 아니냐 마음을 강하게 하고 담대히 하라 두려워 말며 놀라지 말라 네가 어디로 가든지 네 하나님 여호와가 너와 함께 하느니라'],
+['시편 32:8','내가 너의 갈 길을 가르쳐 보이고 너를 주목하여 훈계하리로다'],
+['마태복음 6:34','그러므로 내일 일을 위하여 염려하지 말라 내일 일은 내일 염려할 것이요 한 날 괴로움은 그 날에 족하니라'],
+['잠언 2:6','대저 여호와는 지혜를 주시며 지식과 명철을 그 입에서 내심이며'],
+['고린도전서 10:31','그런즉 너희가 먹든지 마시든지 무엇을 하든지 다 하나님의 영광을 위하여 하라'],
+['이사야 40:31','오직 여호와를 앙망하는 자는 새 힘을 얻으리니 독수리의 날개치며 올라감 같을 것이요 달음박질하여도 곤비치 아니하겠고 걸어가도 피곤치 아니하리로다'],
+['예레미야 29:11','여호와의 말씀이니라 너희를 향한 나의 생각은 내가 아나니 평안이요 재앙이 아니니라 너희 장래에 소망을 주려 하는 생각이라'],
+['베드로전서 5:7','너희 염려를 다 주께 맡겨 버리라 이는 저가 너희를 권고하심이니라'],
+['시편 16:8','내가 여호와를 항상 내 앞에 모심이여 그가 나의 우편에 계시므로 내가 요동치 아니하리로다'],
+['잠언 3:5-6','너는 마음을 다하여 여호와를 의뢰하고 네 명철을 의지하지 말라 너는 범사에 그를 인정하라 그리하면 네 길을 지도하시리라'],
+['요한복음 14:27','평안을 너희에게 끼치노니 곧 나의 평안을 너희에게 주노라 내가 너희에게 주는 것은 세상이 주는 것과 같지 아니하니라 너희는 마음에 근심도 말고 두려워하지도 말라'],
+['시편 121:1-2','내가 산을 향하여 눈을 들리라 나의 도움이 어디서 올꼬 나의 도움이 천지를 지으신 여호와에게서로다'],
+['마태복음 6:33','너희는 먼저 그의 나라와 그의 의를 구하라 그리하면 이 모든 것을 너희에게 더하시리라'],
+['잠언 16:3','너의 행사를 여호와께 맡기라 그리하면 너의 경영하는 것이 이루리라'],
+['신명기 31:8','여호와 그가 네 앞서 행하시며 너와 함께 하사 너를 떠나지 아니하시며 버리지 아니하시리니 너는 두려워 말라 놀라지 말라'],
+['시편 119:105','주의 말씀은 내 발에 등이요 내 길에 빛이니이다'],
+['빌립보서 1:6','너희 속에 착한 일을 시작하신 이가 그리스도 예수의 날까지 이루실 줄을 우리가 확신하노라'],
+['이사야 41:10','두려워 말라 내가 너와 함께 함이니라 놀라지 말라 나는 네 하나님이 됨이니라 내가 너를 굳세게 하리라 참으로 너를 도와 주리라 참으로 나의 의로운 오른손으로 너를 붙들리라'],
+['잠언 9:10','여호와를 경외하는 것이 지혜의 근본이요 거룩하신 자를 아는 것이 명철이니라'],
+['시편 23:1','여호와는 나의 목자시니 내가 부족함이 없으리로다'],
+['데살로니가전서 5:16-18','항상 기뻐하라 쉬지 말고 기도하라 범사에 감사하라 이는 그리스도 예수 안에서 너희를 향하신 하나님의 뜻이니라'],
+['시편 127:2','너희가 일찍이 일어나고 늦게 누우며 수고의 떡을 먹음이 헛되도다 그러므로 여호와께서 그 사랑하시는 자에게는 잠을 주시는도다'],
+['고린도전서 3:7','그런즉 심는 이나 물 주는 이는 아무 것도 아니로되 오직 자라게 하시는 하나님뿐이니라'],
+['디모데후서 1:7','하나님이 우리에게 주신 것은 두려워하는 마음이 아니요 오직 능력과 사랑과 근신하는 마음이니'],
+['로마서 8:28','우리가 알거니와 하나님을 사랑하는 자 곧 그 뜻대로 부르심을 입은 자들에게는 모든 것이 합력하여 선을 이루느니라'],
+['로마서 11:36','이는 만물이 주에게서 나오고 주로 말미암고 주에게로 돌아감이라 영광이 그에게 세세에 있을지어다 아멘']];
 
 /* ----- 저장 ----- */
 const BLANK=()=>({v:1,qs:{},notes:{},days:{},examDate:'',updated:0});
@@ -1283,36 +1353,50 @@ async function initDb(){
 /* ----- 출제 ----- */
 const stat=id=>S.qs[id]||(S.qs[id]={s:0,w:0,st:0,d:0});
 const seen=q=>(S.qs[q.id]||{}).s||0;
+/* 바퀴: 문제은행 전체를 한 번씩 다 풀면 한 바퀴. 다 풀면 다음 바퀴로 넘어가 전체가 처음부터 다시 나온다.
+   지난 시험 기록에서 계산하므로 기록을 지워도 맞게 다시 계산된다. */
+function lapState(){
+  const ids={},all=new Set(BANK.map(q=>q.id));BANK.forEach(q=>{(ids[q.sec]||(ids[q.sec]=new Set())).add(q.id)});
+  let lap=1,done=new Set();
+  EX.slice().sort((a,b)=>a.ts-b.ts).forEach(e=>{e.items.forEach(i=>{const q=QMAP[i.q];if(!q)return;const id=q.base||i.q;if(all.has(id))done.add(id)});if(done.size>=all.size){lap++;done=new Set()}});
+  const left={};for(const s in ids){left[s]=0;ids[s].forEach(id=>{if(!done.has(id))left[s]++})}
+  return {lap,done,left,total:all.size-done.size,has:id=>done.has(id)};
+}
+/* n문제를 영역별로 나눈다: 이번 바퀴에 영역마다 남은 문제 수 비율대로(큰 나머지 방식).
+   → 모든 영역이 같은 속도로 줄어 바퀴 끝에 한 영역만 몰려 남지 않는다. 바퀴 처음에는 문제은행 크기 비율과 같다. */
+function share(n,W){const tot=Object.values(W).reduce((x,y)=>x+y,0),raw={},T={};let sum=0;if(!tot)return T;
+  for(const k in W){raw[k]=n*W[k]/tot;T[k]=Math.floor(raw[k]);sum+=T[k]}
+  Object.keys(W).filter(k=>W[k]).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,n-sum).forEach(k=>T[k]++);return T}
 function buildExam(){
   const N=50,picked=[],has=new Set(),lv=level();
-  /* 한 시험 구성: 한글파일(교재 정리) 42문제 + 기출 8문제.
-     한글파일 영역은 정리 분량(쪽·단 수) 비율대로 나눈다. 내용이 많은 영역일수록 문제가 많다. */
+  /* 한 시험 구성
+     ① 다시 풀 차례가 된 오답 최대 10문제(틀리고 2~6회차 뒤, 두 번 연속 맞힐 때까지)
+     ② 나머지는 이번 바퀴에 아직 안 나온 문제. 영역별 수는 이번 바퀴에 영역마다 남은 문제 수 비율, 사진 문제 5개 안팎,
+        「옳지 않은 것은?」 10개 안팎을 최대한 맞추고, 비율대로 못 채우면 다른 영역의 안 나온 문제로 채운다.
+     ③ 이번 바퀴의 안 나온 문제가 모자라면 남은 자리는 많이 틀렸던 문제로 채운다.
+     → 이번 바퀴에 이미 나온 문제는 바퀴가 끝날 때까지 다시 나오지 않는다(오답·많이 틀린 문제만 예외). */
   const isK=q=>q.sec==='K1'||q.sec==='K2';
-  const KT={K1:4,K2:4},T=secPlan(N);
-  const cnt=s=>picked.filter(x=>x.sec===s).length;
-  const lim=(q,extra)=>isK(q)?KT[q.sec]:(T[q.sec]||0)+extra;
-  const add=(q,extra=0)=>{if(!q||has.has(q.id)||picked.length>=N)return false;{const st=S.qs[q.id];if(st&&st.d&&!dueNow(q))return false}if(cnt(q.sec)>=lim(q,extra))return false;has.add(q.id);picked.push(q);return true};
+  const L=lapState(),fresh=q=>!L.has(q.id);
+  const put=q=>{if(!q||has.has(q.id)||picked.length>=N)return false;const st=S.qs[q.id];if(st&&st.d&&!dueNow(q))return false;has.add(q.id);picked.push(q);return true};
   const least=list=>shuffle(list).sort((a,b)=>(seen(a)-seen(b))||(lv>1?hard(b)-hard(a):0));
   /* 같은 영역 안에서는 아직 안 나온 주제를 먼저 → 주제가 골고루 */
   const spread=list=>{const used=new Set(picked.map(x=>x.topic));const l=least(list);return l.filter(q=>!used.has(q.topic)).concat(l.filter(q=>used.has(q.topic)))};
-  /* 1) 틀렸던 문제: 두 번 연속 맞힐 때까지 다시 (영역마다 정해진 수보다 2문제까지만 더) */
-  const due=shuffle(BANK.filter(dueNow)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w);
-  let nd=0;due.forEach(q=>{if(nd<22&&add(q,2))nd++});
-  /* 2) 틀린 문제와 같은 주제의 비슷한 문제 */
-  let sib=0;shuffle(BANK.filter(q=>(S.qs[q.id]||{}).d)).forEach(q=>{if(sib>=8)return;if(add(least(BANK.filter(x=>x.topic===q.topic&&!has.has(x.id)))[0],2))sib++});
-  /* 교재 사진을 보고 푸는 문제를 매번 5문제 정도 (영역 비율 안에서) */
-  {const isPic=q=>q.img&&/^f/.test(q.img);let np=picked.filter(isPic).length;for(const q of spread(BANK.filter(q=>isPic(q)&&!has.has(q.id)))){if(np>=5)break;if(add(q))np++}}
-  /* 3) 보훈병원 시험에 나오는 「옳지 않은 것은?」 유형을 매번 10문제 정도 (영역 비율 안에서) */
-  {let ng=picked.filter(isNeg).length;for(const q of spread(BANK.filter(q=>isNeg(q)&&!isK(q)&&!has.has(q.id)))){if(ng>=10)break;if(add(q))ng++}}
-  /* 4) 영역별로 정해진 수까지 채우기 (덜 본 문제, 안 나온 주제부터) */
-  Object.keys(T).forEach(s=>{for(const q of spread(BANK.filter(q=>q.sec===s&&!has.has(q.id)))){if(cnt(s)>=T[s])break;add(q)}});
-  for(const q of least(BANK.filter(q=>!has.has(q.id)&&!isK(q)))){if(picked.length>=N)break;add(q,9)}
-  /* 5) 점수가 높으면 연결형 문제로 바꿔 더 헷갈리게 */
-  const syn={},dueIds=new Set(due.map(q=>q.id));let need=0;
-  const qs=shuffle(picked).map(q=>{if(need>0&&!dueIds.has(q.id)&&shortQ(q)){const y=mkSyn(q);if(y){need--;syn[y.id]=y;return y}}return q});
-  reg(syn);const order={};qs.forEach(q=>order[q.id]=ordOf(q));
-  const now=Date.now();
-  return {id:'e'+now.toString(36),start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn,lv};
+  const pool=f=>BANK.filter(q=>fresh(q)&&!has.has(q.id)&&f(q));
+  /* ① 오답 최대 10문제 (많이 틀린 것부터) */
+  let nd=0;shuffle(BANK.filter(dueNow)).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w).forEach(q=>{if(nd<10&&put(q))nd++});
+  /* 남은 자리를 이번 바퀴에 영역마다 남은 문제 수 비율대로 나눈다 */
+  const T=share(N-picked.length,L.left),fc={};const cnt=s=>fc[s]||0;
+  const add=q=>{if(!q||cnt(q.sec)>=(T[q.sec]||0))return false;if(put(q)){fc[q.sec]=cnt(q.sec)+1;return true}return false};
+  /* ② 이번 바퀴에 안 나온 문제: 사진 → 옳지 않은 것은 → 영역 비율 → 나머지 */
+  {const isPic=q=>q.img&&/^f/.test(q.img);let np=picked.filter(isPic).length;for(const q of spread(pool(isPic))){if(np>=5)break;if(add(q))np++}}
+  {let ng=picked.filter(isNeg).length;for(const q of spread(pool(q=>isNeg(q)&&!isK(q)))){if(ng>=10)break;if(add(q))ng++}}
+  Object.keys(T).forEach(s=>{for(const q of spread(pool(q=>q.sec===s))){if(cnt(s)>=T[s])break;add(q)}});
+  for(const q of spread(pool(()=>true))){if(picked.length>=N)break;put(q)}
+  /* ③ 모자라면 많이 틀렸던 문제 → 그래도 모자라면 덜 본 문제 */
+  for(const q of shuffle(BANK.filter(q=>(S.qs[q.id]||{}).w>0&&!has.has(q.id))).sort((a,b)=>S.qs[b.id].w-S.qs[a.id].w)){if(picked.length>=N)break;put(q)}
+  for(const q of least(BANK.filter(q=>!has.has(q.id)))){if(picked.length>=N)break;put(q)}
+  const qs=shuffle(picked),order={};qs.forEach(q=>order[q.id]=ordOf(q));const now=Date.now();
+  return {id:'e'+now.toString(36),start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn:{},lv};
 }
 /* 틀리거나 헷갈린 문제는 2~6회차 뒤 중 무작위 회차에 다시 나온다(바로 다음 회차는 안 나옴 → 단기기억으로 맞히지 않게).
    다시 맞혀도 한 번 더 2~6회차 뒤에 확인하고, 두 번 연속 맞히면 오답에서 빠진다.
@@ -1320,25 +1404,24 @@ function buildExam(){
 const gap=(qid,eid)=>{let h=7;const t=qid+'|'+eid;for(let j=0;j<t.length;j++)h=(h*31+t.charCodeAt(j))>>>0;return 2+h%5};
 function applyItem(i,k,eid){const q=QMAP[i.q];if(!q)return;const id=q.base||i.q,s=stat(id);s.s++;const nx=k+gap(id,eid||'');if(i.ok&&i.f){s.st=0;s.d=1;s.nx=nx}else if(i.ok){s.st++;if(s.d){if(s.st>=2)s.d=0;else s.nx=nx}}else{s.w++;s.st=0;s.d=1;s.nx=nx}}
 /* 홈: 지금까지 푼 시험 전체 평균 */
-/* 한 시험의 영역별 문제 수: 한글파일 42문제는 정리 분량(쪽·단 수) 비율대로, 기출 8문제는 4·4 */
-const SECW={A:3,B:2,C:11,D:7,E:2,F:8,G:6,H:8,I:4,J:5,L:4};
-function secPlan(N){const W=SECW,HN=N-8,T={K1:4,K2:4};const tot=Object.values(W).reduce((x,y)=>x+y,0),raw={};let sum=0;
-  for(const k in W){raw[k]=HN*W[k]/tot;T[k]=Math.floor(raw[k]);sum+=T[k]}
-  Object.keys(W).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,HN-sum).forEach(k=>T[k]++);return T}
+/* 바퀴 처음의 영역별 문제 수(문제은행 크기 비율). 홈 「영역 한눈에 보기」에 표시. */
+function secPlan(N){const W={};BANK.forEach(q=>W[q.sec]=(W[q.sec]||0)+1);const tot=BANK.length,raw={},T={};let sum=0;
+  for(const k in W){raw[k]=N*W[k]/tot;T[k]=Math.floor(raw[k]);sum+=T[k]}
+  Object.keys(W).sort((x,y)=>(raw[y]-T[y])-(raw[x]-T[x])).slice(0,N-sum).forEach(k=>T[k]++);return T}
 /* 홈: 전체 영역을 한눈에 — 매회 출제 수, 지금까지 풀어본 비율, 정답률 */
 function areaBoard(){
-  const T=secPlan(50),seen={},ans={},ok={},cnt={},pg={};
+  const T=secPlan(50),LS=lapState(),seen={},ans={},ok={},cnt={},pg={};
   BANK.forEach(q=>{cnt[q.sec]=(cnt[q.sec]||0)+1;if(q.p){const r=pg[q.sec]||(pg[q.sec]=[99,0]);r[0]=Math.min(r[0],q.p);r[1]=Math.max(r[1],q.p)}});
   EX.forEach(e=>e.items.forEach(i=>{const q=QMAP[i.q];if(!q)return;(seen[q.sec]=seen[q.sec]||new Set()).add(q.id);ans[q.sec]=(ans[q.sec]||0)+1;ok[q.sec]=(ok[q.sec]||0)+(i.ok?1:0)}));
   const row=k=>{const sn=seen[k]?seen[k].size:0,sp=pct(sn,cnt[k]),cp=ans[k]?pct(ok[k],ans[k]):null,where=pg[k]?(pg[k][0]===pg[k][1]?pg[k][0]+'쪽':pg[k][0]+'~'+pg[k][1]+'쪽'):'2020~2025';
     return '<div class="ab"><div class="abh"><b>'+esc(SEC[k])+'</b><small>'+where+'</small><span class="abq">매회 '+T[k]+'문제 <small>('+Math.round(T[k]*2)+'%)</small></span></div>'+
-    '<div class="abr"><span>풀어본 문제</span><div class="ovbar"><i style="width:'+sp+'%"></i></div><em>'+sn+' / '+cnt[k]+' ('+sp+'%)</em></div>'+
+    '<div class="abr"><span>'+LS.lap+'바퀴째</span><div class="ovbar"><i style="width:'+pct(cnt[k]-LS.left[k],cnt[k])+'%"></i></div><em>이번 바퀴 남은 '+LS.left[k]+'문제</em></div>'+'<div class="abr"><span>풀어본 문제</span><div class="ovbar"><i style="width:'+sp+'%"></i></div><em>'+sn+' / '+cnt[k]+' ('+sp+'%)</em></div>'+
     '<div class="abr"><span>정답률</span><div class="ovbar ok"><i style="width:'+(cp||0)+'%"></i></div><em>'+(cp===null?'아직 없음':cp+'% <small>('+ok[k]+'/'+ans[k]+')</small>')+'</em></div></div>'};
   const hk=Object.keys(SEC).filter(k=>!/^K/.test(k)),kk=Object.keys(SEC).filter(k=>/^K/.test(k));
   const tq=BANK.length,ts=Object.values(seen).reduce((a,s)=>a+s.size,0);
   return '<section class="card"><h2>영역 한눈에 보기 <small class="muted">'+Object.keys(SEC).length+'개 영역 · '+tq+'문제</small></h2>'+
   '<p class="muted">매회 50문제 중 각 영역에서 몇 문제가 나오는지, 지금까지 그 영역 문제를 얼마나 풀어 봤는지, 맞힌 비율이 얼마인지 보여 줍니다. 지금까지 전체 문제의 '+pct(ts,tq)+'%('+ts+'문제)를 풀어 봤습니다.</p>'+
-  '<h3 class="ovh">한글파일 (매회 42문제)</h3>'+hk.map(row).join('')+'<h3 class="ovh">국가시험 기출 (매회 8문제)</h3>'+kk.map(row).join('')+'</section>';
+  '<h3 class="ovh">한글파일 (매회 '+hk.reduce((a,k)=>a+(T[k]||0),0)+'문제 안팎)</h3>'+hk.map(row).join('')+'<h3 class="ovh">국가시험 기출 (매회 '+kk.reduce((a,k)=>a+(T[k]||0),0)+'문제 안팎)</h3>'+kk.map(row).join('')+'</section>';
 }
 function overall(){
   if(!EX.length)return '';
@@ -1419,20 +1502,20 @@ memo(){
 },
 home(){
   const le=lastExam(),due=BANK.filter(dueNow).length,wait=BANK.filter(q=>(S.qs[q.id]||{}).d).length-due,td=EX.filter(e=>e.date===today());
-  const unseen=BANK.filter(q=>!seen(q)).length;
+  const LS=lapState(),unseen=LS.total;
   let prog='';
   if(P){const left=P.end-Date.now();prog='<div class="notice"><b>풀던 시험이 있습니다.</b> '+(left>0?'남은 시간 '+Math.ceil(left/60000)+'분, ':'시간이 끝났습니다. ')+Object.keys(P.ans).length+'문제에 답했습니다.<div class="row">'+(left>0?'<button class="btn pri" data-act="resume">이어서 풀기</button>':'<button class="btn pri" data-act="grade-now">지금 채점하기</button>')+'<button class="btn ghost" data-act="discard">이 시험 버리기</button></div></div>'}
   return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 50문제 모의시험</h1>'+
-  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다.</p><p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p>'+
+  '<p class="lead"><b>목표는 100점입니다.</b> 5지선다 '+BANK.length+'문제 은행에서 매번 50문제를 냅니다.</p>'+'<p class="muted">매회 오답 10문제 안팎 + 이번 바퀴에 아직 안 나온 문제로 냅니다. 영역별 문제 수는 이번 바퀴에 영역마다 남은 문제 수 비율대로라서 모든 영역이 함께 줄어듭니다. <b>'+LS.lap+'바퀴째</b> · 남은 문제 <b>'+unseen+'문제</b>.</p>'+'<p class="muted">기출에서 자주 나오는 숫자·각도·도구 이름은 <button class="link" data-act="kfacts">기출 숫자·도구·정렬 정리</button>에 따로 모았습니다.</p>'+
   (P?prog:'<button class="btn pri big" data-act="start">시험 풀기</button>')+
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
-  '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다음 시험에 나올 오답</span><b>'+due+'문제</b>'+(wait?'<em>기다리는 오답 '+wait+'문제</em>':'')+'</div><div class="tile"><span>아직 안 본 문제</span><b>'+unseen+'문제</b></div></section>'+
+  '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(due?' warn':'')+'"><span>다음 시험에 나올 오답</span><b>'+due+'문제</b>'+(wait?'<em>기다리는 오답 '+wait+'문제</em>':'')+'</div><div class="tile"><span>이번 바퀴 남은 문제</span><b>'+unseen+'문제</b></div></section>'+
   overall()+areaBoard()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
   '<div class="row">'+(le?'<button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제는 한글파일 1~29쪽 내용과 2020~2025년 국가시험 기출(보조기학·의지학)로 이루어져 있습니다. 한글파일 쪽 번호는 표 한 장을 한 쪽으로 센 것이고, 기출 문제는 회차와 문제 번호를 함께 보여 줍니다.</p>';
 },
 ready(){
-  const k=Math.floor(Date.now()/864e5)+EX.length,c=CHEER[k%CHEER.length],v=VERSES[k%VERSES.length];
+  const k=EX.length,c=CHEER[k%CHEER.length],v=VERSES[k%VERSES.length];
   return '<section class="card center ready"><p class="eyebrow">시험 시작 전에</p><h2 class="cheer">'+esc(c)+'</h2><blockquote class="verse"><p>'+esc(v[1])+'</p><cite>'+esc(v[0])+' · 개역한글</cite></blockquote><p class="muted">천천히 한 번 읽고 시작하세요. 아래 버튼을 누르면 60분 타이머가 바로 시작됩니다.</p><div class="row cjust"><button class="btn pri big" data-act="begin">읽었어요, 시험 시작</button><button class="btn ghost" data-act="home">나중에 하기</button></div></section>';
 },
 exam(){
