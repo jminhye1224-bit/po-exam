@@ -1225,7 +1225,9 @@ const NV0=BANK.length;
 function nvRef(sec,key){return BANK.slice(0,NV0).find(q=>q.sec===sec&&((q.head||'')+' '+q.stem+' '+q.opts[0]).includes(key))}
 function NQ(sec,key,stem,opts,exp){const r=nvRef(sec,key);Q(sec,r?r.p:0,r?r.col:'L',r?r.topic:'새유형',r?r.head:'',stem,opts,exp);const q=BANK[BANK.length-1];q.nv=1;return q}
 /* 조합형: st = [[문장, 참/거짓], ...] (ㄱ부터 차례로). 정답 = 참인 것들. 보기 순서는 ㄱ 순서로 고정. */
-function NC(sec,key,lead,st,exp){
+/* ㄱ·ㄴ·ㄷ·ㄹ 조합형은 실제 시험에 안 나와서 문제은행에 넣지 않는다(2026-11-27). */
+function NC(){return null}
+function NC_off(sec,key,lead,st,exp){
   const L='ㄱㄴㄷㄹㅁ'.split('').slice(0,st.length),T=L.filter((l,i)=>st[i][1]),fmt=a=>a.join(', ');
   const all=[];const n=L.length;for(let m=1;m<(1<<n);m++){const s=L.filter((l,i)=>m&(1<<i));all.push(s)}
   const right=fmt(T);const pool=all.map(fmt).filter(x=>x!==right);
@@ -1931,9 +1933,6 @@ NQI('f52','H','ground','그림의 AFO가 무릎을 안정시키는 원리는?',
 NQI('f50','H','PLS','그림의 AFO가 제한하는 움직임은?',
  ['발바닥굽힘','발등굽힘','발목의 모든 움직임','안쪽굽음만','무릎 폄'],
  '그림은 PLS AFO입니다. 절단선이 복사뼈 뒤에 있어 발바닥굽힘을 제한하고 발등굽힘은 허용합니다.');
-NQI('f55','H','dial','그림의 무릎관절장치의 특징은?',
- ['굽힘과 폄 중 한쪽만 허용하거나 모두 제한하도록 원하는 각도로 조절한다.','봉을 당기면 풀리고 놓으면 자동으로 잠긴다.','업라이트에 사각 링을 끼워 잠근다.','돌림축이 업라이트보다 뒤에 있다.','뒤의 bail을 의자 모서리로 밀어 푼다.'],
- '그림은 dial lock knee jt입니다.');
 NQI('n16','H','bail','그림의 무릎관절장치를 푸는 방법은?',
  ['손이나 의자 모서리로 뒤의 bail을 민다.','업라이트의 사각 링을 위로 올린다.','봉을 당긴다.','부채 모양 조절판의 나사를 푼다.','디딤기 말기에 배굴하면 케이블이 당겨진다.'],
  '그림은 bail lock(cam lock) knee jt입니다.');
@@ -1946,9 +1945,6 @@ NQI('f44','F','8자형','그림의 보조기를 쓰는 경우로 옳은 것은?'
 NQI('f43','F','위팔 커프','그림의 팔걸이에 대한 설명으로 옳은 것은?',
  ['아래팔 지지대 대신 위팔을 감싸는 넓은 커프를 쓰며 착용한 채 옷을 입을 수 있다.','어깨를 벌림 자세로 보호하며 벌림 각도를 조절한다.','침상 모서리나 휠체어 바에 매단다.','가벼운 천 재질로 돌림근띠 병변에 쓴다.','스트랩 하나로 아탈구를 막는다.'],
  '그림은 위팔 커프 팔걸이(수직형 팔걸이)입니다.');
-NQI('f41','F','elbow control','그림의 보조기를 적용하는 경우로 옳은 것은?',
- ['측부인대 재건 수술 후 팔꿈치 안가쪽 안정이 필요할 때','팔꿈치 굽힘 구축을 늘려야 할 때','가쪽위관절융기염의 통증 감소','만성 류마티스 관절염의 완전 고정','어깨 아탈구'],
- '그림은 elbow control orthosis입니다. 조절용 힌지로 굽힘·폄 각도를 제한합니다.');
 NQI('f40','F','전기','그림의 보조기를 쓰는 대상은?',
  ['손목 폄근 조절이 부족한 C4·C5 사지마비 환자','C6 사지마비 환자','노신경마비 손목처짐 환자','정중신경 손상 원숭이손 환자','화상 환자'],
  '그림은 전기 구동 잡기 보조기입니다. C6은 flexor hinge orth.');
@@ -2631,8 +2627,8 @@ function morph(list){
   const out=[],syn={},used=new Set(list.map(q=>q.id));let flip=0;
   list.forEach(q=>{let y=null;
     if(seen(q)>0&&!q.fo&&!q.img){
-      if(isNeg(q))y=mkNegCombo(q);
-      else if(jOK(q)){const r=Math.random();y=r<0.34?mkCombo(q,used):mkJudge(q,(flip++)%2===1,used)}}
+      /* ㄱ·ㄴ·ㄷ·ㄹ 조합형은 쓰지 않는다. 「옳은 것은?/옳지 않은 것은?」 판단형만 */
+      if(!isNeg(q)&&jOK(q))y=mkJudge(q,(flip++)%2===1,used)}
     if(y){syn[y.id]=y;out.push(y)}else out.push(q)});
   reg(syn);return {qs:out,syn};
 }
