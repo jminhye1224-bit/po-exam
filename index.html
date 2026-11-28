@@ -68,6 +68,7 @@ button:focus-visible,textarea:focus-visible,input:focus-visible{outline:3px soli
 .stem,.mq{white-space:pre-line} .wk h3{font-size:1rem;margin:0 0 6px} .wkl{margin:0;padding-left:18px} .wkl li{margin:6px 0;line-height:1.5} .wkl .mq{display:block;color:var(--muted,#666);font-size:.9em} .wkl b{color:var(--good,#1d6b40)}
 .nt{width:100%;border-collapse:collapse} .nt th{text-align:left;font-weight:600;width:38%;padding:8px 8px 8px 0;vertical-align:top;border-top:1px solid #e6ebe8;font-size:.92em} .nt td{padding:8px 0;border-top:1px solid #e6ebe8} .nt .nv{font-weight:700;color:#0f6b5e} .nt small{display:block;color:#a0522d;margin-top:3px} body.nh .nt td{cursor:pointer} body.nh .nt td:not(.show) .nv,body.nh .nt td:not(.show) small{background:#cfd8d4;color:transparent;border-radius:4px}
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:9999} .perfectbox{background:linear-gradient(135deg,#fff7e0,#e6f6ef);border:2px solid #f2b134} .perfectbox .praise{font-size:1.15rem;font-weight:700;color:#0f6b5e} .perfectbox .pf{font-size:2.6rem;line-height:1.2;animation:pf 1s ease-in-out infinite alternate} @keyframes pf{from{transform:scale(1)}to{transform:scale(1.15) rotate(4deg)}}
+.core{border:2px solid #0f6b5e;background:linear-gradient(135deg,#eef8f4,#fff)} .core .row{margin-top:12px}
 .tile{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 16px;display:flex;flex-direction:column;gap:2px}
 .tile span{font-size:13px;color:var(--muted)} .tile b{font-size:22px;font-variant-numeric:tabular-nums} .tile em{font-style:normal;font-size:13px;color:var(--muted)}
 .tile.warn{border-color:var(--bad)} .tile.warn b{color:var(--bad)}
@@ -2552,7 +2553,7 @@ const seen=q=>(S.qs[q.id]||{}).s||0;
 function lapState(){
   const ids={},all=new Set(BANK.map(q=>q.id));BANK.forEach(q=>{(ids[q.sec]||(ids[q.sec]=new Set())).add(q.id)});
   let lap=1,done=new Set();
-  EX.filter(e=>e.mode!=='w').sort((a,b)=>a.ts-b.ts).forEach(e=>{e.items.forEach(i=>{const q=QMAP[i.q];if(!q)return;const id=q.base||i.q;if(all.has(id))done.add(id)});if(done.size>=all.size){lap++;done=new Set()}});
+  EX.filter(e=>!e.mode).sort((a,b)=>a.ts-b.ts).forEach(e=>{e.items.forEach(i=>{const q=QMAP[i.q];if(!q)return;const id=q.base||i.q;if(all.has(id))done.add(id)});if(done.size>=all.size){lap++;done=new Set()}});
   const left={};for(const s in ids){left[s]=0;ids[s].forEach(id=>{if(!done.has(id))left[s]++})}
   return {lap,done,left,total:all.size-done.size,has:id=>done.has(id)};
 }
@@ -2582,10 +2583,15 @@ const jQ=q=>q.stem.replace(/\s*\?\s*$/,'').replace(/\s*(으로|로)?\s*(가장\s
 const jLine=(q,a)=>jQ(q)+' → '+a;
 const TNAME={"절단발생": "절단의 발생", "절단원인": "절단의 원인", "합병증": "절단 합병증", "상지절단": "팔 절단", "전완절단길이": "아래팔 절단 길이", "상완절단": "위팔 절단", "족부절단": "발 절단", "사임절단": "사임 절단", "하퇴대퇴절단": "종아리·넓적다리 절단", "골반하반신": "엉덩관절 이단·골반·하반신 절단", "특수절단": "특수한 기능을 위한 절단", "탈감작": "절단단 탈감작", "연성드레싱": "연성 드레싱", "드레싱종류": "절단단 드레싱", "구축": "절단 후 구축", "위생환각통": "절단단 위생과 환각통", "처방고려": "의지 처방", "K-level": "K-level(기능 수준)", "골격식": "외골격식·내골격식 의지", "근전동": "근전동 의지", "근전동전극": "근전동 의지 전극", "근전동특징": "근전동 의지의 특징", "손의지": "손 의지", "손목이단의지": "손목관절 이단 의지", "아래팔의수": "아래팔 의지", "VO-VC": "수의적 개방식·폐쇄식 말단장치", "Hosmer후크": "Hosmer 후크", "VC후크": "수의적 폐쇄식 후크", "핸드": "의수 핸드", "손목장치": "손목장치", "손목장치각도": "손목장치 종류", "아래팔소켓": "아래팔 의지 소켓", "조절케이블": "조절 케이블", "8자하니스": "8자형 하니스", "하니스작동": "하니스 작동", "하니스종류": "하니스 종류", "근전동현가": "근전동 의지 현가장치", "팔꿈치힌지": "팔꿈치 힌지", "팔꿈치이단": "팔꿈치관절 이단 의지", "위팔소켓": "위팔 의지 소켓", "위팔팔꿈치": "위팔 의지 팔꿈치관절장치", "위팔케이블": "위팔 의지 조절 케이블", "위팔하니스": "위팔 의지 하니스", "신체측정": "의지를 위한 신체 측정", "어깨이단의지": "어깨관절 이단 의지", "발가락사임": "발가락·발 절단 의지", "사임소켓": "사임 의지 소켓", "사임발": "사임 의지발", "BK소켓": "종아리 의지 소켓", "접촉면": "소켓 접촉면", "BK현가": "종아리 의지 현가장치", "PTB변형": "PTB 변형 소켓", "SACH": "SACH 발", "의지발": "의지발", "무릎이단": "무릎관절 이단 의지", "AK소켓": "넓적다리 의지 소켓", "장사방형": "장사방형 소켓", "무릎장치": "의지 무릎관절장치", "AK현가": "넓적다리 의지 현가장치", "기능부품": "의지 기능 부품", "엉덩이단": "엉덩관절 이단 의지", "하반신양측": "하반신·양측 절단 의지", "삼점압": "삼점압 원리", "보조기원리": "보조기의 원리", "팔보조기목적": "팔 보조기 착용 목적", "팔보조기분류": "팔 보조기 분류", "엄지보조기": "엄지 보조기", "손가락보조기": "손가락 보조기", "MP보조기": "손허리손가락관절 보조기", "손보조기": "손 보조기", "손목자세": "손목관절-손 보조기 자세", "WHO": "손목관절-손 보조기", "cockup": "cock up 보조기", "사지마비보조기": "사지마비 환자의 보조기", "팔꿈치보조기": "팔꿈치 보조기", "팔걸이": "팔걸이(sling)", "어깨보조기": "어깨 보조기", "비부착형": "신체 비부착형 보조기", "발보조기": "발 보조기", "구두어퍼": "구두 어퍼", "구두창": "구두창", "구두굽": "구두굽", "보강재": "구두 보강재", "발바닥활": "발바닥활", "안쪽활수정": "안쪽 세로발바닥활 지지 수정", "가쪽활수정": "가쪽 세로발바닥활 지지 수정", "가로활수정": "가로발바닥활 지지 수정", "바": "구두 바(bar)", "구두높이기": "구두 높이기", "스터럽": "스터럽", "인서트": "인서트", "업라이트": "업라이트", "발목축": "보조기 발목관절장치 축", "발목장치": "보조기 발목관절장치", "클렌작": "클렌작 발목관절장치", "운동보조형": "운동보조형 AFO", "장딴지밴드": "장딴지 밴드와 커프", "AFO스트랩": "AFO 부속품", "플라스틱AFO": "플라스틱 AFO", "나선형": "나선형·반나선형 AFO", "GRAFO": "지면반력 AFO", "SMO": "SMO", "관절형AFO": "관절형 AFO", "카본AFO": "카본 AFO", "체중지지AFO": "체중지지 AFO", "KAFO잠금": "KAFO 잠금형 무릎관절장치", "KAFO조절": "KAFO 조절형 무릎관절장치", "AO": "발목관절 보조기(AO)", "후크": "후크", "보조기분류": "보조기 분류", "맞섬보조기": "맞섬 보조기", "갈퀴손": "갈퀴손 보조기", "무릎관절KAFO": "KAFO 무릎관절장치", "stance control": "stance control 무릎관절장치", "무릎캡": "무릎 캡", "굽이무릎스트랩": "굽이무릎 스트랩", "굽이무릎패드": "굽이무릎 패드", "플라스틱KAFO": "플라스틱 KAFO", "체중부하KAFO": "체중부하 KAFO", "patten bottom": "patten bottom 보조기", "골반밴드": "골반 밴드", "엉덩관절장치": "보조기 엉덩이관절장치", "볼기패드": "볼기 패드", "KO": "무릎 보조기(KO)", "선천성탈구": "엉덩관절 형성이상 보조기", "비틀림변형": "다리 돌림축 변형 보조기", "페르테스": "레그-칼베-페르테스병 보조기", "하반신마비": "하반신마비 보조기", "RGO": "RGO", "보조기점검": "보조기 점검", "척추보조기제한": "척추 보조기의 움직임 제한", "척추보조기효과": "척추 보조기의 효과", "연성척추": "연성 척추 보조기", "경성척추구성": "경성 척추 보조기 구성요소", "경성LSO": "허리-엉치 보조기(LSO)", "경성TLSO": "등-허리-엉치 보조기(TLSO)", "옆굽음증": "옆굽음증 보조기", "목보조기": "목 보조기", "지주형목": "지주형 목 보조기", "최대고정목": "최대 고정 목 보조기", "보행유형": "보행 유형", "보행기": "보행기", "크러치": "크러치", "지팡이": "지팡이", "보조기구측정": "보행보조기구 길이 측정", "휠체어": "휠체어", "휠체어좌석": "휠체어 좌석 치수", "휠체어부품": "휠체어 부품", "발절단": "발 절단", "팔꿈치장치": "팔꿈치관절장치", "사임의지": "사임 의지", "굽이스트랩": "굽이무릎 스트랩"};
 function tTitle(k){const s=String(k.topic||'');return TNAME[s]||s||SEC[k.sec]}
+/* 비슷한 문제 판별: 질문+정답의 글자 2개 묶음 겹침 비율 */
+const bgr=s=>{s=String(s).replace(/[\s.,·()「」→?~-]/g,'');const o=new Set();for(let i=0;i<s.length-1;i++)o.add(s.slice(i,i+2));return o};
+const BG={};const qbg=q=>BG[q.id]||(BG[q.id]=bgr(q.stem+q.opts[0]));
+function simQ(a,b){const A=qbg(a),B=qbg(b);let n=0;A.forEach(x=>{if(B.has(x))n++});return n/Math.max(1,Math.min(A.size,B.size))}
+const sameAns=(a,b)=>String(a.opts[0]).replace(/\s/g,'')===String(b.opts[0]).replace(/\s/g,'');
 function mkJudge(k,neg,used){
-  const same=BANK.filter(x=>x!==k&&jOK(x)&&!used.has(x.id)&&x.stem!==k.stem);
+  const same=BANK.filter(x=>x!==k&&!x.nv&&jOK(x)&&!used.has(x.id)&&x.stem!==k.stem);
   /* 같은 주제 안에서만 묶는다 → 「○○에 대한 설명으로 옳은 것은?」 */
-  let pool=shuffle(same.filter(x=>x.topic===k.topic)).slice(0,4);if(pool.length<4)return null;
+  const pool=[];for(const x of shuffle(same.filter(x=>x.topic===k.topic))){if(pool.length>=4)break;if([k].concat(pool).some(y=>simQ(x,y)>0.5||sameAns(x,y)))continue;pool.push(x)}if(pool.length<4)return null;
   const wr=q=>q.opts[1+Math.floor(Math.random()*4)];
   const opts=neg?[jLine(k,wr(k))].concat(pool.map(x=>jLine(x,x.opts[0]))):[jLine(k,k.opts[0])].concat(pool.map(x=>jLine(x,wr(x))));
   const all=[k].concat(pool);
@@ -2631,7 +2637,7 @@ function morph(list){
   list.forEach(q=>{let y=null;
     if(seen(q)>0&&!q.fo&&!q.img){
       /* ㄱ·ㄴ·ㄷ·ㄹ 조합형은 쓰지 않는다. 「옳은 것은?/옳지 않은 것은?」 판단형만 */
-      if(!isNeg(q)&&!/^K/.test(q.sec)&&TNAME[q.topic]&&jOK(q)&&Math.random()<0.45)y=mkJudge(q,(flip++)%2===1,used)}
+      if(!q.nv&&!isNeg(q)&&!/^K/.test(q.sec)&&TNAME[q.topic]&&jOK(q)&&Math.random()<0.45)y=mkJudge(q,(flip++)%2===1,used)}
     if(y){syn[y.id]=y;out.push(y)}else out.push(q)});
   reg(syn);return {qs:out,syn};
 }
@@ -2644,6 +2650,32 @@ function buildWrong(){
   return {id:'w'+now.toString(36),mode:'w',start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn:M.syn,lv:level()};
 }
 let WMODE=false;
+/* ----- 핵심 최종 점검: 주제마다 대표 1문제(+약한 주제는 1~2문제 더) + 틀렸던 기출, 비슷한 문제는 하나만 ----- */
+function coreList(){
+  const st=id=>S.qs[id]||{},acc={};
+  EX.forEach(e=>e.items.forEach(i=>{const x=QMAP[i.q];if(!x)return;const q=QMAP[x.base||i.q]||x;const k=q.sec+'|'+q.topic;const a=acc[k]||(acc[k]={n:0,ok:0});a.n++;if(i.ok&&!i.f)a.ok++}));
+  const rank=q=>{const s=st(q.id);return [-(s.w||0),-(s.f||0),q.nv?0:1,hash(q.id)%997]};
+  const cmp=(a,b)=>{const A=rank(a),B=rank(b);for(let i=0;i<A.length;i++)if(A[i]!==B[i])return A[i]-B[i];return 0};
+  const G={};BANK.forEach(q=>{if(/^K/.test(q.sec))return;(G[q.sec+'|'+q.topic]=G[q.sec+'|'+q.topic]||[]).push(q)});
+  const out=[];const ok=q=>!out.some(y=>simQ(q,y)>0.5||(sameAns(q,y)&&simQ(q,y)>0.3));
+  Object.keys(G).forEach(k=>{const L=G[k].sort(cmp),a=acc[k],extra=(a&&a.n>=3&&a.ok/a.n<0.7)?2:1;let n=0;for(const q of L){if(n>=extra)break;if(ok(q)){out.push(q);n++}}});
+  BANK.filter(q=>/^K/.test(q.sec)&&((st(q.id).w||0)>=2||st(q.id).d)).sort(cmp).forEach(q=>{if(ok(q))out.push(q)});
+  return out;
+}
+function coreState(){
+  const pool=coreList().map(q=>q.id),ps=new Set(pool),C=EX.filter(e=>e.mode==='c');const done=new Set();
+  C.forEach(e=>e.items.forEach(i=>{const id=wbase(i.q);if(ps.has(id))done.add(id)}));
+  const sc=C.map(e=>pct(e.score,e.n));
+  return {pool,done,left:pool.filter(id=>!done.has(id)),times:C.length,avg:sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):null};
+}
+function buildCore(){
+  const C=coreState(),N=50,wc=id=>(S.qs[id]||{}).w||0;
+  let ids=C.left.slice().sort((a,b)=>wc(b)-wc(a)||hash(a)%997-hash(b)%997).slice(0,N);
+  if(!ids.length)ids=shuffle(C.pool.slice()).slice(0,N);
+  const qs=shuffle(ids.map(id=>QMAP[id])),order={};qs.forEach(q=>order[q.id]=ordOf(q));const now=Date.now();
+  return {id:'c'+now.toString(36),mode:'c',start:now,end:now+3600e3,qids:qs.map(q=>q.id),order,ans:{},flag:{},cur:0,syn:{},lv:level()};
+}
+let CMODE=false;
 function buildExam(){
   const N=50,picked=[],has=new Set(),lv=level();
   /* 한 시험 구성
@@ -2704,7 +2736,7 @@ function areaBoard(){
   '<h3 class="ovh">한글파일 (매회 '+hk.reduce((a,k)=>a+(T[k]||0),0)+'문제 안팎)</h3>'+hk.map(row).join('')+'<h3 class="ovh">국가시험 기출 (매회 '+kk.reduce((a,k)=>a+(T[k]||0),0)+'문제 안팎)</h3>'+kk.map(row).join('')+'</section>';
 }
 function overall(){
-  const EM=EX.filter(e=>e.mode!=='w');if(!EM.length)return '';
+  const EM=EX.filter(e=>!e.mode);if(!EM.length)return '';
   const sc=EM.map(e=>pct(e.score,e.n)),avg=Math.round(sc.reduce((a,b)=>a+b,0)/sc.length),best=Math.max(...sc);
   const r3=sc.slice(-3),a3=Math.round(r3.reduce((a,b)=>a+b,0)/r3.length);
   const first=sc.slice(0,Math.min(3,sc.length)),a0=Math.round(first.reduce((a,b)=>a+b,0)/first.length);
@@ -2767,7 +2799,7 @@ function drawNav(){const n=$('#nav');if(!n)return;n.hidden=(view==='exam');n.inn
 const VIEWS={
 papers(){
   if(!EX.length)return '<section class="card center"><h2>아직 푼 시험이 없습니다</h2><p class="lead">시험을 풀면 시험지가 회차별로 여기에 쌓입니다.</p><div class="row cjust"><button class="btn pri" data-act="start">시험 풀기</button></div></section>';
-  return '<section class="card"><h2>지금까지 푼 시험지</h2><p class="muted">회차를 누르면 점수와 시험지 전체를 볼 수 있습니다.</p><table class="tbl"><thead><tr><th>회차</th><th>날짜</th><th class="num">점수</th><th class="num">정답</th><th class="num">시간</th><th></th></tr></thead><tbody>'+EX.slice().reverse().map(e=>'<tr><td>'+(EX.indexOf(e)+1)+'회'+(e.mode==='w'?' <span class="chip">오답</span>':'')+'</td><td>'+e.date+'</td><td class="num"><b>'+pct(e.score,e.n)+'점</b></td><td class="num">'+e.score+' / '+e.n+'</td><td class="num">'+Math.floor(e.dur/60)+'분</td><td class="num"><button class="link" data-act="open-paper" data-id="'+e.id+'">시험지 보기</button> <button class="link del" data-act="del1" data-id="'+e.id+'">삭제</button></td></tr>').join('')+'</tbody></table><p class="muted">연습 삼아 제출한 시험은 「삭제」로 지우면 통계, 오답노트, 다시 나올 문제에서도 함께 빠집니다.</p></section><section class="card"><h2>기록 전체 지우기</h2><p class="muted">모든 시험 기록과 오답노트를 지우고 처음부터 다시 시작합니다. 되돌릴 수 없습니다.</p><div class="row"><button class="btn ghost" data-act="reset1">기록 모두 지우기</button><span id="resetbox"></span></div></section>';
+  return '<section class="card"><h2>지금까지 푼 시험지</h2><p class="muted">회차를 누르면 점수와 시험지 전체를 볼 수 있습니다.</p><table class="tbl"><thead><tr><th>회차</th><th>날짜</th><th class="num">점수</th><th class="num">정답</th><th class="num">시간</th><th></th></tr></thead><tbody>'+EX.slice().reverse().map(e=>'<tr><td>'+(EX.indexOf(e)+1)+'회'+(e.mode==='w'?' <span class="chip">오답</span>':e.mode==='c'?' <span class="chip">핵심</span>':'')+'</td><td>'+e.date+'</td><td class="num"><b>'+pct(e.score,e.n)+'점</b></td><td class="num">'+e.score+' / '+e.n+'</td><td class="num">'+Math.floor(e.dur/60)+'분</td><td class="num"><button class="link" data-act="open-paper" data-id="'+e.id+'">시험지 보기</button> <button class="link del" data-act="del1" data-id="'+e.id+'">삭제</button></td></tr>').join('')+'</tbody></table><p class="muted">연습 삼아 제출한 시험은 「삭제」로 지우면 통계, 오답노트, 다시 나올 문제에서도 함께 빠집니다.</p></section><section class="card"><h2>기록 전체 지우기</h2><p class="muted">모든 시험 기록과 오답노트를 지우고 처음부터 다시 시작합니다. 되돌릴 수 없습니다.</p><div class="row"><button class="btn ghost" data-act="reset1">기록 모두 지우기</button><span id="resetbox"></span></div></section>';
 },
 paper(){
   const e=cur||lastExam();if(!e)return VIEWS.papers();
@@ -2802,7 +2834,7 @@ memo(){
 },
 home(){
   const le=lastExam(),due=BANK.filter(dueNow).length,wait=BANK.filter(q=>(S.qs[q.id]||{}).d).length-due,td=EX.filter(e=>e.date===today());
-  const LP=lapState(),unseen=LP.total,WS=wrongState();
+  const LP=lapState(),unseen=LP.total,WS=wrongState(),CS=coreState();
   let prog='';
   if(P){const left=P.end-Date.now();prog='<div class="notice"><b>풀던 시험이 있습니다.</b> '+(left>0?'남은 시간 '+Math.ceil(left/60000)+'분, ':'시간이 끝났습니다. ')+Object.keys(P.ans).length+'문제에 답했습니다.<div class="row">'+(left>0?'<button class="btn pri" data-act="resume">이어서 풀기</button>':'<button class="btn pri" data-act="grade-now">지금 채점하기</button>')+'<button class="btn ghost" data-act="discard">이 시험 버리기</button></div></div>'}
   return '<section class="hero"><p class="eyebrow">중앙보훈병원 의지·보조기기사 필기 대비</p><h1>60분 50문제 모의시험</h1>'+
@@ -2811,12 +2843,13 @@ home(){
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
   '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(WS.left?' warn':'')+'" data-act="notebook" style="cursor:pointer"><span>누적 오답 시험 남은 문제</span><b>'+WS.left+'문제</b><em>누적 오답 '+WS.pool.length+'문제 · 오답노트에서 풀기</em></div><div class="tile"><span>이번 바퀴 남은 문제</span><b>'+unseen+'문제</b></div></section>'+
   overall()+areaBoard()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
+  '<section class="card core"><h2>🎯 핵심 최종 점검</h2><p class="muted">시험 직전용. 한글파일 주제마다 대표 문제 1개(정답률 70% 아래인 약한 주제는 2개) + 아직 못 고친 기출 오답만, 비슷한 문제는 하나만 골랐습니다. 원래 문제 모양 그대로 나옵니다.</p><div class="tiles"><div class="tile"><span>전체</span><b>'+CS.pool.length+'문제</b><em>50문제씩 약 '+Math.ceil(CS.pool.length/50)+'회</em></div><div class="tile'+(CS.left.length?' warn':'')+'"><span>남은 문제</span><b>'+CS.left.length+'문제</b>'+(CS.times?'<em>'+CS.times+'회 풂'+(CS.avg!==null?' · 평균 '+CS.avg+'점':'')+'</em>':'')+'</div></div><div class="row cjust"><button class="btn pri big" data-act="cstart">'+(P?'풀던 시험 이어서 풀기':CS.left.length?'핵심 점검 시작 ('+Math.min(50,CS.left.length)+'문제 · 60분)':'핵심 점검 한 번 더')+'</button></div></section>'+
   '<div class="row">'+(le?'<button class="btn pri" data-act="weak">약점 진단 · 꼭 외울 것</button><button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제는 한글파일 1~29쪽 내용과 2020~2025년 국가시험 기출(보조기학·의지학)로 이루어져 있습니다. 한글파일 쪽 번호는 표 한 장을 한 쪽으로 센 것이고, 기출 문제는 회차와 문제 번호를 함께 보여 줍니다.</p>';
 },
 ready(){
   const k=EX.length,c=CHEER[k%CHEER.length],v=VERSES[k%VERSES.length];
-  return '<section class="card center ready"><p class="eyebrow">'+(WMODE?'누적 오답 시험 · 시작 전에':'시험 시작 전에')+'</p><h2 class="cheer">'+esc(c)+'</h2><blockquote class="verse"><p>'+esc(v[1])+'</p><cite>'+esc(v[0])+' · 개역한글</cite></blockquote><p class="muted">천천히 한 번 읽고 시작하세요. 아래 버튼을 누르면 60분 타이머가 바로 시작됩니다.</p><div class="row cjust"><button class="btn pri big" data-act="begin">읽었어요, 시험 시작</button><button class="btn ghost" data-act="home">나중에 하기</button></div></section>';
+  return '<section class="card center ready"><p class="eyebrow">'+(CMODE?'핵심 최종 점검 · 시작 전에':WMODE?'누적 오답 시험 · 시작 전에':'시험 시작 전에')+'</p><h2 class="cheer">'+esc(c)+'</h2><blockquote class="verse"><p>'+esc(v[1])+'</p><cite>'+esc(v[0])+' · 개역한글</cite></blockquote><p class="muted">천천히 한 번 읽고 시작하세요. 아래 버튼을 누르면 60분 타이머가 바로 시작됩니다.</p><div class="row cjust"><button class="btn pri big" data-act="begin">읽었어요, 시험 시작</button><button class="btn ghost" data-act="home">나중에 하기</button></div></section>';
 },
 exam(){
   if(!P)return VIEWS.home();
@@ -2895,9 +2928,9 @@ function startDrill(){const e=cur||lastExam(),ids=wrongOf(e).map(i=>i.q);drill={
 function finalText(){const d=today(),td=EX.filter(e=>e.date===d),all=[];td.forEach(e=>wrongOf(e).forEach(i=>{if(!all.includes(i.q))all.push(i.q)}));let t='['+d+' 오늘 정리]\n점수: '+td.map(e=>e.score+'/'+e.n).join(', ')+'\n\n[외울 것]\n';all.forEach(id=>{const q=QMAP[id];t+='- '+q.stem+' → '+q.opts[0]+' ('+q.p+'쪽)\n';if((S.notes[id]||'').trim())t+='  내 정리: '+S.notes[id].trim()+'\n'});const f=(S.days[d]||{}).final;if(f)t+='\n[한 줄 정리]\n'+f+'\n';return t}
 
 const ACT={
-  start(){WMODE=false;go('ready')},weak(){go('weak')},party(){celebrate()},nums(){go('nums')},papers(){go('papers')},paper(){go('paper')},notebook(){go('notebook')},memo(){go('memo')},result(){go('result')},
+  start(){WMODE=false;CMODE=false;go('ready')},cstart(){if(P){go('exam');return}CMODE=true;WMODE=false;go('ready')},weak(){go('weak')},party(){celebrate()},nums(){go('nums')},papers(){go('papers')},paper(){go('paper')},notebook(){go('notebook')},memo(){go('memo')},result(){go('result')},
   'open-paper'(el){cur=EX.find(e=>e.id===el.dataset.id)||null;go('paper')},
-  'memo-open'(){document.querySelectorAll('details.mm').forEach(d=>d.open=true)},'memo-close'(){document.querySelectorAll('details.mm').forEach(d=>d.open=false)},begin(){P=WMODE?buildWrong():buildExam();WMODE=false;saveProg();go('exam')},wstart(){if(P){go('exam');return}WMODE=true;go('ready')},
+  'memo-open'(){document.querySelectorAll('details.mm').forEach(d=>d.open=true)},'memo-close'(){document.querySelectorAll('details.mm').forEach(d=>d.open=false)},begin(){P=CMODE?buildCore():WMODE?buildWrong():buildExam();WMODE=false;CMODE=false;saveProg();go('exam')},wstart(){if(P){go('exam');return}WMODE=true;CMODE=false;go('ready')},
   resume(){go('exam')},
   'grade-now'(){grade()},
   discard(){P=null;saveProg();go('home')},
