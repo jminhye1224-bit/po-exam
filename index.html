@@ -2652,18 +2652,42 @@ function buildWrong(){
 let WMODE=false;
 /* ----- 핵심 최종 점검: 주제마다 대표 1문제(+약한 주제는 1~2문제 더) + 틀렸던 기출, 비슷한 문제는 하나만 ----- */
 function coreList(){
+  /* 목표 약 480문제: 한글파일 ≈ 410 + 기출 오답 ≤ 70.
+     주제마다 문제 수에 비례(약 1/3)해서 뽑되, 이미 뽑은 것과 가장 다른 내용부터 고른다(내용 겹침 최소화).
+     첫 문제는 예담이가 많이 틀린 것. 정답률 70% 아래 주제는 1개 더. */
   const st=id=>S.qs[id]||{},acc={};
   EX.forEach(e=>e.items.forEach(i=>{const x=QMAP[i.q];if(!x)return;const q=QMAP[x.base||i.q]||x;const k=q.sec+'|'+q.topic;const a=acc[k]||(acc[k]={n:0,ok:0});a.n++;if(i.ok&&!i.f)a.ok++}));
-  const rank=q=>{const s=st(q.id);return [-(s.w||0),-(s.f||0),q.nv?0:1,hash(q.id)%997]};
-  const cmp=(a,b)=>{const A=rank(a),B=rank(b);for(let i=0;i<A.length;i++)if(A[i]!==B[i])return A[i]-B[i];return 0};
+  const pr=q=>{const s=st(q.id);return (s.w||0)*10+(s.f||0)*3+(s.d?5:0)};
+  const tie=q=>hash(q.id)%997;
   const G={};BANK.forEach(q=>{if(/^K/.test(q.sec))return;(G[q.sec+'|'+q.topic]=G[q.sec+'|'+q.topic]||[]).push(q)});
-  const out=[];const ok=q=>!out.some(y=>simQ(q,y)>0.5||(sameAns(q,y)&&simQ(q,y)>0.3));
-  Object.keys(G).forEach(k=>{const L=G[k].sort(cmp),a=acc[k],extra=(a&&a.n>=3&&a.ok/a.n<0.7)?2:1;let n=0;for(const q of L){if(n>=extra)break;if(ok(q)){out.push(q);n++}}});
-  BANK.filter(q=>/^K/.test(q.sec)&&((st(q.id).w||0)>=2||st(q.id).d)).sort(cmp).forEach(q=>{if(ok(q))out.push(q)});
+  const HT=Object.values(G).reduce((a,g)=>a+g.length,0),R=410/HT;
+  const out=[];const dup=q=>out.some(y=>simQ(q,y)>0.5||(sameAns(q,y)&&simQ(q,y)>0.3));
+  Object.keys(G).forEach(k=>{
+    const L=G[k].slice().sort((a,b)=>pr(b)-pr(a)||tie(a)-tie(b)),a=acc[k];
+    const m=Math.min(L.length,Math.max(1,Math.round(L.length*R))+((a&&a.n>=3&&a.ok/a.n<0.7)?1:0));
+    const got=[];
+    while(got.length<m){let best=null,bs=-1;
+      for(const q of L){if(got.includes(q)||dup(q))continue;
+        const d=got.length?1-Math.max(...got.map(y=>simQ(q,y))):1;const sc=d*10+pr(q)*0.5;
+        if(sc>bs){bs=sc;best=q}}
+      if(!best)break;got.push(best);out.push(best)}
+  });
+  BANK.filter(q=>/^K/.test(q.sec)&&((st(q.id).w||0)>=2||st(q.id).d)).sort((a,b)=>pr(b)-pr(a)||tie(a)-tie(b)).forEach(q=>{if(out.length<500&&!dup(q))out.push(q)});
   return out;
 }
+/* 핵심 목록은 한 번 고르면 고정(저장) → 풀면서 목록이 바뀌지 않는다 */
+let COREC=null;
+function coreIds(){
+  /* 기록을 다 불러온 뒤 하루에 한 번 고른다(날짜가 바뀌면 그날 기록으로 다시 고름) */
+  if(COREC&&COREC.n===EX.length||COREC&&COREC.fixed)return COREC.ids;
+  const c=LS.get('core1');
+  if(c&&c.day===today()&&Array.isArray(c.ids)&&c.ids.length&&c.ids.every(id=>QMAP[id])){COREC={ids:c.ids,fixed:1};return c.ids}
+  const ids=coreList().map(q=>q.id);
+  if(EX.length){LS.set('core1',{ids,day:today()});COREC={ids,fixed:1}}else COREC={ids,n:0};
+  return ids;
+}
 function coreState(){
-  const pool=coreList().map(q=>q.id),ps=new Set(pool),C=EX.filter(e=>e.mode==='c');const done=new Set();
+  const pool=coreIds(),ps=new Set(pool),C=EX.filter(e=>e.mode==='c');const done=new Set();
   C.forEach(e=>e.items.forEach(i=>{const id=wbase(i.q);if(ps.has(id))done.add(id)}));
   const sc=C.map(e=>pct(e.score,e.n));
   return {pool,done,left:pool.filter(id=>!done.has(id)),times:C.length,avg:sc.length?Math.round(sc.reduce((a,b)=>a+b,0)/sc.length):null};
@@ -2843,7 +2867,7 @@ home(){
   '<div class="ddayrow"><label for="examdate">시험일</label><input type="date" id="examdate" value="'+esc(S.examDate)+'"><strong class="dday">'+dday()+'</strong></div></section>'+
   '<section class="tiles"><div class="tile"><span>오늘 푼 시험</span><b>'+td.length+'회</b></div><div class="tile"><span>최근 점수</span><b>'+(le?le.score+' / '+le.n:'없음')+'</b>'+(le?'<em>'+pct(le.score,le.n)+'점</em>':'')+'</div><div class="tile'+(WS.left?' warn':'')+'" data-act="notebook" style="cursor:pointer"><span>누적 오답 시험 남은 문제</span><b>'+WS.left+'문제</b><em>누적 오답 '+WS.pool.length+'문제 · 오답노트에서 풀기</em></div><div class="tile"><span>이번 바퀴 남은 문제</span><b>'+unseen+'문제</b></div></section>'+
   overall()+areaBoard()+'<section class="card"><h2>오늘 공부 순서</h2><ol class="flow"><li><b>시험</b> 응원과 말씀 한 구절을 읽고, 60분 동안 50문제를 풉니다. 헷갈리는 문제는 「헷갈려요」로 표시합니다.</li><li><b>오답노트</b> 틀린 문제와 헷갈린 문제의 정답과 해설, 한글파일에서 확인할 쪽을 보고 내 말로 다시 적습니다.</li><li><b>다시 풀기</b> 틀린 문제를 모두 맞힐 때까지 반복합니다.</li><li><b>오늘 정리</b> 외울 것과 다시 읽을 쪽을 한 장으로 모읍니다.</li></ol>'+
-  '<section class="card core"><h2>🎯 핵심 최종 점검</h2><p class="muted">시험 직전용. 한글파일 주제마다 대표 문제 1개(정답률 70% 아래인 약한 주제는 2개) + 아직 못 고친 기출 오답만, 비슷한 문제는 하나만 골랐습니다. 원래 문제 모양 그대로 나옵니다.</p><div class="tiles"><div class="tile"><span>전체</span><b>'+CS.pool.length+'문제</b><em>50문제씩 약 '+Math.ceil(CS.pool.length/50)+'회</em></div><div class="tile'+(CS.left.length?' warn':'')+'"><span>남은 문제</span><b>'+CS.left.length+'문제</b>'+(CS.times?'<em>'+CS.times+'회 풂'+(CS.avg!==null?' · 평균 '+CS.avg+'점':'')+'</em>':'')+'</div></div><div class="row cjust"><button class="btn pri big" data-act="cstart">'+(P?'풀던 시험 이어서 풀기':CS.left.length?'핵심 점검 시작 ('+Math.min(50,CS.left.length)+'문제 · 60분)':'핵심 점검 한 번 더')+'</button></div></section>'+
+  '<section class="card core"><h2>🎯 핵심 최종 점검</h2><p class="muted">시험 직전용. 한글파일 주제마다 문제 수에 비례해 서로 다른 내용으로 골랐습니다(약 3개 중 1개, 약한 주제는 1개 더). 여기에 아직 못 고친 기출 오답을 더했고, 비슷한 문제는 하나만 넣었습니다. 원래 문제 모양 그대로 나옵니다.</p><div class="tiles"><div class="tile"><span>전체</span><b>'+CS.pool.length+'문제</b><em>50문제씩 약 '+Math.ceil(CS.pool.length/50)+'회</em></div><div class="tile'+(CS.left.length?' warn':'')+'"><span>남은 문제</span><b>'+CS.left.length+'문제</b>'+(CS.times?'<em>'+CS.times+'회 풂'+(CS.avg!==null?' · 평균 '+CS.avg+'점':'')+'</em>':'')+'</div></div><div class="row cjust"><button class="btn pri big" data-act="cstart">'+(P?'풀던 시험 이어서 풀기':CS.left.length?'핵심 점검 시작 ('+Math.min(50,CS.left.length)+'문제 · 60분)':'핵심 점검 한 번 더')+'</button></div></section>'+
   '<div class="row">'+(le?'<button class="btn pri" data-act="weak">약점 진단 · 꼭 외울 것</button><button class="btn" data-act="open-last">최근 시험 오답노트</button><button class="btn" data-act="final">오늘 정리 보기</button>':'')+'<button class="btn" data-act="stats">통계 보기</button></div></section>'+
   '<p class="foot">문제는 한글파일 1~29쪽 내용과 2020~2025년 국가시험 기출(보조기학·의지학)로 이루어져 있습니다. 한글파일 쪽 번호는 표 한 장을 한 쪽으로 센 것이고, 기출 문제는 회차와 문제 번호를 함께 보여 줍니다.</p>';
 },
